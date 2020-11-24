@@ -1,0 +1,14 @@
+/**
+ * Landing Page
+ */
+
+#landing-bg{
+   background-image: url("./assets/landing-bg.jpg");
+    background-position: center;
+    background-size: cover;
+    height: 100vh;
+}
+
+/**
+ *
+ */

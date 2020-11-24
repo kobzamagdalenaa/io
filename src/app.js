@@ -8,6 +8,8 @@ import accountService from "./account.service";
 import AccountForm from "./account/accountForm";
 import LoginForm from "./account/login";
 import ManageUsers from "./mangeUsers/manageUsers";
+import LandingPage from "./landingPage/landingPage";
+import DepartmentsView from "./departments/departments";
 
 
 render(<Root/>, document.getElementById('root'));
@@ -26,9 +28,17 @@ function Root() {
   }, []);
 
   return (
+
     <div>
-      <div>{loggedId ? <AccountToolbar/> : <AccountForm/> }</div>
+      <nav className="navbar navbar-expand-lg navbar-light bg-light">
+        <a className="navbar-brand" href="#">NAZWA APLIAKCJI</a>
+
+        <div className="w-100" id="navbarSupportedContent">
+          <div>{loggedId ? <AccountToolbar/> : <AccountForm/>  }</div>
+        </div>
+      </nav>
       <div>{fullyLoggedId ? <App/> : (loggedId ? <LoginForm/> : '')}</div>
+      {(!loggedId ? <LandingPage/> : '')}
     </div>
   )
 }
@@ -61,6 +71,9 @@ function App() {
             <li>
               <Link to="/users">Users</Link>
             </li>
+            <li>
+              <Link to="/departments">Oddziały Szpitalne</Link>
+            </li>
             {isAdmin ? (<li>
               <Link to="/manage-users">Zarządzaj Użytkownikami</Link>
             </li>) : ''}
@@ -79,6 +92,9 @@ function App() {
           <Route path="/manage-users">
             <ManageUsers/>
           </Route>
+          <Route path="/departments">
+            <DepartmentsView/>
+          </Route>
           <Route path="/">
             <Home/>
           </Route>
@@ -91,9 +107,9 @@ function App() {
 function AccountToolbar() {
 
   return (
-    <div>
+    <div className="row align-items-baseline">
       <div>Zalogowany jako: {accountService.login}</div>
-      <button onClick={() => {location.reload()}}>Wyloguj</button>
+      <button className="btn btn-outline-danger ml-auto mr-4" onClick={() => {location.reload()}}>Wyloguj</button>
     </div>
   )
 }

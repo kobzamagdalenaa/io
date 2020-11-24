@@ -32,19 +32,53 @@ export default function SignUpForm() {
   return (
     <div ref={signUpData}>
       <form id="registerForm" onSubmit={register}>
-        <label>Login
-          <input type="text" value={signUpData.login} onChange={e => signUpData.login = e.target.value}/>
-        </label>
-        <label>Hasło
-          <input type="password" value={signUpData.password} onChange={e => signUpData.password = e.target.value}/>
-        </label>
-        <label>Imię
-          <input type="text" value={signUpData.name} onChange={e => signUpData.name = e.target.value}/>
-        </label>
-        <label>Nazwisko
-          <input type="text" value={signUpData.surname} onChange={e => signUpData.surname = e.target.value}/>
-        </label>
-        <input type="submit" value="Zarejestruj"/>
+        <div className="form-row justify-content-center align-items-baseline mt-3">
+          <div className="form-group col-md-2 mr-4">
+            <div className="row">
+              <label className="sr-only" htmlFor="inlineFormInputGroup">Login</label>
+              <div className="input-group mb-2">
+                <div className="input-group-prepend">
+                  <div className="input-group-text">Login</div>
+                </div>
+                <input type="text" className="form-control" value={signUpData.login} onChange={e => signUpData.login = e.target.value} />
+              </div>
+            </div>
+          </div>
+          <div className="form-group col-md-2 mr-4">
+            <div className="row">
+              <label className="sr-only" htmlFor="inlineFormInputGroup">Hasło</label>
+              <div className="input-group mb-2">
+                <div className="input-group-prepend">
+                  <div className="input-group-text">Hasło</div>
+                </div>
+                <input type="password" className="form-control" value={signUpData.password} onChange={e => signUpData.password = e.target.value} />
+              </div>
+            </div>
+          </div>
+          <div className="form-group col-md-2 mr-4">
+            <div className="row">
+              <label className="sr-only" htmlFor="inlineFormInputGroup">Imię</label>
+              <div className="input-group mb-2">
+                <div className="input-group-prepend">
+                  <div className="input-group-text">Imię</div>
+                </div>
+                <input type="text" className="form-control" value={signUpData.name} onChange={e => signUpData.name = e.target.value} />
+              </div>
+            </div>
+          </div>
+          <div className="form-group col-md-2 mr-4">
+            <div className="row">
+              <label className="sr-only" htmlFor="inlineFormInputGroup">Nazwisko</label>
+              <div className="input-group mb-2">
+                <div className="input-group-prepend">
+                  <div className="input-group-text">Nazwisko</div>
+                </div>
+                <input type="text" className="form-control" value={signUpData.surname} onChange={e => signUpData.surname = e.target.value} />
+              </div>
+            </div>
+          </div>
+          <input className="btn btn-info" type="submit" value="Zarejestruj"/>
+        </div>
       </form>
     </div>
   );

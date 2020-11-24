@@ -19,10 +19,11 @@ export default function AccountForm() {
   }
 
   return (
-    <div>
-      <div>
-        <button onClick={() => setForm('LOGIN')}>Zaloguj</button>
-        <button onClick={() => setForm('REGISTER')}>Załóż konto</button>
+    <div className="text-center">
+      <div className="">
+
+        <button className="btn btn-primary" onClick={() => setForm('LOGIN')}>Zaloguj</button> &nbsp;
+        <button className="btn btn-outline-primary" onClick={() => setForm('REGISTER')}>Załóż konto</button>
       </div>
       {renderForm()}
     </div>

@@ -47,27 +47,44 @@ export default function LoginForm() {
   }
 
   return accountService.isLoggedIn() ? (
-    <div>
+    <div className="mt-5 text-center">
       {(currentHospital ? `Obecna organizacja: ${accountService.hospital.name}` : '')}
       Wybierz organizację
-      <div>
+      <div >
         {_.keys(availableHospitals).map(hospitalId => {
           const hospitalName = _.filter(allHospitals, $ => $.id === hospitalId)[0].name;
-          return (<button onClick={() => switchHospital(hospitalId, hospitalName)}>{hospitalName}</button>)
+          return (<button className="btn btn-outline-success ml-1 mr-1" onClick={() => switchHospital(hospitalId, hospitalName)}>{hospitalName}</button>)
         })}
         {_.keys(availableHospitals).length === 0 ? 'Twoje konto nie jest powiązane z żadnym szpitalem. Zgłoś się do administratora szpitala.' : ''}
       </div>
     </div>
   ) : (
-    <div>
+    <div className="">
+
       <form onSubmit={loginAs}>
-        <label>Login
-          <input type="text" value={loginData.login} onChange={e => loginData.login = e.target.value}/>
-        </label>
-        <label>Hasło
-          <input type="password" value={loginData.password} onChange={e => loginData.password = e.target.value}/>
-        </label>
-        <input type="submit" value="Zaloguj"/>
+        <div className="form-row justify-content-center align-items-baseline mt-3">
+          <div className="form-group col-md-2">
+            <div className="row">
+              <label className="sr-only" htmlFor="inlineFormInputGroup">Login</label>
+              <div className="input-group mb-2">
+              <div className="input-group-prepend">
+                <div className="input-group-text">Login</div>
+              </div>
+              <input type="text" className="form-control" value={loginData.login} onChange={e => loginData.login = e.target.value} />
+              </div>
+            </div>
+          </div> &nbsp;&nbsp;
+          <div className="form-group col-md-2">
+            <label className="sr-only" htmlFor="inlineFormInputGroup">Hasło</label>
+            <div className="input-group mb-2">
+              <div className="input-group-prepend">
+                <div className="input-group-text">Hasło</div>
+              </div>
+            <input type="password" className="form-control" type="password" value={loginData.password} onChange={e => loginData.password = e.target.value}/>
+            </div>
+          </div>
+          <input className="btn btn-info" type="submit" value="Zaloguj"/>
+        </div>
       </form>
     </div>
   );
