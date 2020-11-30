@@ -24,7 +24,7 @@ export default function BedsManagement() {
   }
 
   return (
-    <div className="w-100">
+    <div className="w-100 px-3">
       <h2 className="text-center">{managedDepartment ? managedDepartment.name : "Oddziały:"}</h2>
       {
         managedDepartment ? (

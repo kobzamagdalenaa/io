@@ -35,7 +35,7 @@ export default function HospitalDepartmentsManagement() {
   }
 
   return (
-    <div className="w-100">
+    <div className="w-100 px-3">
       <h2 className="text-center">Zarządzanie oddziałami szpitala</h2>
       {
         managedDepartment ? (

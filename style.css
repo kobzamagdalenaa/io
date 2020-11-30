@@ -12,6 +12,21 @@
     height: 100vh;
 }
 
+nav ul{
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    padding-left: 0;
+}
+
+nav ul li{
+    list-style: none;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
 /**
  *
  */
