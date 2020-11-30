@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {db} from "../db";
 import * as _ from "lodash";
-import accountService from "../account.service";
+import accountService from "../services/account.service";
 
 
 export default function ManageUsers() {

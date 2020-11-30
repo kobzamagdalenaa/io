@@ -7,7 +7,12 @@
     "moment": "^2.29.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "firebase": "^8.0.2"
+    "firebase": "^8.0.2",
+    "@amcharts/amcharts4": "^4.10.11",
+    "bootstrap-daterangepicker": "^3.1.0",
+    "react-bootstrap-daterangepicker": "^7.0.0",
+    "@fortawesome/fontawesome-free": "^5.15.1",
+    "bootstrap": "^4.5.3"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
@@ -18,12 +23,13 @@
     "react-router-dom": "^5.2.0",
     "webpack": "^5.4.0",
     "webpack-cli": "^4.2.0",
-    "webpack-dev-server": "^3.11.0"
+    "webpack-dev-server": "^3.11.0",
+    "file-loader": "^6.2.0"
   },
   "scripts": {
     "start": "webpack serve",
-    "build-unix": "webpack --mode=production && cp index.html ./dist/index.html && cp style.css ./dist/style.css",
-    "build-windows": "webpack --mode=production && copy index.html dist && copy style.css dist"
+    "build-unix": "webpack --mode=production && cp index.html ./dist/index.html",
+    "build-windows": "webpack --mode=production && copy index.html dist"
   },
   "eslintConfig": {
     "extends": [

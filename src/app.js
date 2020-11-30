@@ -4,12 +4,16 @@ import {BrowserRouter as Router, Link, Route, Switch} from "react-router-dom";
 import {db} from "./db";
 import * as _ from 'lodash';
 import Patients from "./patients/patients";
-import accountService from "./account.service";
+import accountService from "./services/account.service";
 import AccountForm from "./account/accountForm";
 import LoginForm from "./account/login";
 import ManageUsers from "./mangeUsers/manageUsers";
 import LandingPage from "./landingPage/landingPage";
-import DepartmentsView from "./departments/departments";
+import HospitalsManagement from "./hospitals/hospitalsManagement";
+import DepartmentsManagement from "./departments/departmentsManagement";
+import HospitalDepartmentsManagement from "./hospitals/hospitalDepartmentsManagement";
+import BedsManagement from "./beds/bedsManagement";
+import '../style.css';
 
 
 render(<Root/>, document.getElementById('root'));
@@ -65,14 +69,23 @@ function App() {
             <li>
               <Link to="/">Home</Link>
             </li>
-            <li>
-              <Link to="/patients">Pacjenci</Link>
-            </li>
-            <li>
-              <Link to="/users">Users</Link>
-            </li>
+            {/*<li>*/}
+            {/*  <Link to="/patients">Pacjenci</Link>*/}
+            {/*</li>*/}
+            {/*<li>*/}
+            {/*  <Link to="/users">Users</Link>*/}
+            {/*</li>*/}
             <li>
               <Link to="/departments">Oddziały Szpitalne</Link>
+            </li>
+            <li>
+              <Link to="/hospital-departments-management">Zarządzaj oddziałami szpitala</Link>
+            </li>
+            <li>
+              <Link to="/hospitals-management">Zarządzaj Szpitalami</Link>
+            </li>
+            <li>
+              <Link to="/departments-management">Zarządzaj Słownikiem Oddziałów</Link>
             </li>
             {isAdmin ? (<li>
               <Link to="/manage-users">Zarządzaj Użytkownikami</Link>
@@ -92,8 +105,17 @@ function App() {
           <Route path="/manage-users">
             <ManageUsers/>
           </Route>
+          <Route path="/hospital-departments-management">
+            <HospitalDepartmentsManagement />
+          </Route>
           <Route path="/departments">
-            <DepartmentsView/>
+            <BedsManagement />
+          </Route>
+          <Route path="/hospitals-management">
+            <HospitalsManagement />
+          </Route>
+          <Route path="/departments-management">
+            <DepartmentsManagement />
           </Route>
           <Route path="/">
             <Home/>
@@ -108,7 +130,10 @@ function AccountToolbar() {
 
   return (
     <div className="row align-items-baseline">
-      <div>Zalogowany jako: {accountService.login}</div>
+      <div>
+        <span>Zalogowany jako: {accountService.login}</span>
+        {accountService.hospital ? <span>, szpital: {accountService.hospital.name}</span> : ''}
+      </div>
       <button className="btn btn-outline-danger ml-auto mr-4" onClick={() => {location.reload()}}>Wyloguj</button>
     </div>
   )

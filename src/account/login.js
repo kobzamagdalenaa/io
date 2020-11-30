@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {db} from "../db";
 import * as _ from "lodash";
 import firebase from "firebase";
-import accountService from "../account.service";
+import accountService from "../services/account.service";
 
 export default function LoginForm() {
   const [loginData] = useState({login: undefined, password: undefined});
