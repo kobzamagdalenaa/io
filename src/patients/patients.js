@@ -1,18 +1,17 @@
 import React, {useEffect, useState} from 'react';
-import {useHistory} from "react-router-dom";
+import {Route, Switch, useHistory, useParams, useRouteMatch} from "react-router-dom";
 import patientService from "../services/patients.service";
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link,
-  useParams,
-  useRouteMatch
-} from "react-router-dom";
 import AddOrEditPatient from "./addOrEditPatient";
 import Search from "../components/search.component";
-import Input from "../components/input.component";
-import Radio from "../components/radio.component";
+import Section from "../components/section.component";
+import moment from "moment";
+import departmentsService from "../services/departments.service";
+import hospitalsService from "../services/hospitals.service";
+import Select from "../components/select.component";
+import bedsService from "../services/beds.service";
+import DateTimeRangePicker from "../components/dateTimeRangePicker.component";
+import occupationService from "../services/occupations.service";
+import Textarea from "../components/textarea.component";
 
 export default function Patients() {
   const { path, url } = useRouteMatch();
@@ -22,14 +21,14 @@ export default function Patients() {
       <Route exact path={path}>
         <PatientsList />
       </Route>
-      <Route path={`${url}/:pesel/edit`}>
+      <Route path={`${path}/add`}>
         <AddOrEditPatient />
       </Route>
-      <Route path={`${url}/:pesel`}>
+      <Route path={`${path}/:pesel/edit`}>
+        <AddOrEditPatient />
+      </Route>
+      <Route path={`${path}/:pesel`}>
         <ViewPatient />
-      </Route>
-      <Route path={`${url}/add`}>
-        <AddOrEditPatient />
       </Route>
     </Switch>
   )
@@ -70,10 +69,188 @@ function ViewPatient() {
           </tr>
         </table>
       </div>
-      <div className="text-center" style={{marginTop: "50px"}}>
+      <div className="text-center mt-3">
         {/*<button className="btn btn-light" style={{marginRight: "20px"}} onClick={() => history.goBack()}>Anuluj</button>*/}
         {/*{managedDepartment.id ? <button className="btn btn-danger" style={{marginRight: "20px"}} onClick={() => removeDepartment(managedDepartment)}>Usuń</button> : ''}*/}
         <button className="btn btn-primary" onClick={() => history.push(`${url}/edit`)}>Edytuj</button>
+      </div>
+      <PatientOccupations />
+    </div>
+  )
+}
+
+function PatientOccupations() {
+  const history = useHistory();
+  const { path, url } = useRouteMatch();
+  const { pesel, departmentId, hospitalId, bedId, dateRange } = useParams();
+  const [managedOccupation, setManagedOccupation] = useState();
+  const [departments, setDepartments] = useState([]);
+  const [hospitals, setHospitals] = useState([]);
+  const [beds, setBeds] = useState([]);
+  const [occupations, setOccupations] = useState([]);
+
+  useEffect(() => {
+    loadDictionaries()
+    loadOccupations()
+  }, []);
+
+  useEffect(() => {
+    loadBeds();
+  }, [managedOccupation]);
+
+  useEffect(() => {
+    if (pesel !== undefined && departmentId !== undefined && hospitalId !== undefined && bedId !== undefined && dateRange !== undefined) {
+      setManagedOccupation({
+        pesel, departmentId, hospitalId, bedId,
+        from: moment(dateRange.split("_")[0], "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss"),
+        to: moment(dateRange.split("_")[1], "YYYYMMDDHHmmss").format("YYYY-MM-DD HH:mm:ss")
+      })
+    }
+  }, [pesel, departmentId, hospitalId, bedId, dateRange]);
+
+  async function loadDictionaries() {
+    const [departments, hospitals] = await Promise.all([
+      departmentsService.loadAll(),
+      hospitalsService.loadAll()
+    ]);
+    setHospitals(hospitals);
+    setDepartments(departments);
+  }
+
+  async function loadOccupations() {
+    setOccupations((await occupationService.load(pesel)).sort($ => $.from).reverse())
+  }
+
+  async function loadBeds() {
+    if (managedOccupation && managedOccupation.hospitalId !== undefined && managedOccupation.departmentId !== undefined
+        && managedOccupation.from !== undefined && managedOccupation.to !== undefined) {
+      const period = {
+        from: moment(managedOccupation.from),
+        to: moment(managedOccupation.to)
+      }
+      const beds = await bedsService.loadAll(managedOccupation.hospitalId, managedOccupation.departmentId);
+      const filter = beds.filter(bed => dateRange ? activeAt(bed, period) : true);
+      setBeds(filter);
+    }
+  }
+
+  async function saveManagedOccupation() {
+    if ((await verifyNotCollidingWithRemoved()) && (await verifyNotCollidingWithOccupations())) {
+      await occupationService.upsert(managedOccupation);
+      setManagedOccupation(undefined);
+      await loadOccupations();
+    }
+  }
+
+  async function verifyNotCollidingWithOccupations() {
+    const occupations = await occupationService.loadForBed(managedOccupation.hospitalId, managedOccupation.departmentId, managedOccupation.bedId);
+    const period = {
+      from: moment(managedOccupation.from),
+      to: moment(managedOccupation.to)
+    }
+    const colliding = occupations.filter($ => $.id !== managedOccupation.id && moment($.from).isSameOrBefore(period.to) && moment($.to).isSameOrAfter(period.from));
+    console.log(colliding)
+    if (colliding.length) {
+      alert("W wybranym terminie łóżko jest zajęte!");
+    }
+    return !colliding.length;
+  }
+
+  async function verifyNotCollidingWithRemoved() {
+    const bed = (await bedsService.load(`${managedOccupation.hospitalId}X${managedOccupation.departmentId}_${managedOccupation.bedId}`));
+    const period = {
+      from: moment(managedOccupation.from),
+      to: moment(managedOccupation.to)
+    }
+    const isActive = activeAt(bed, period);
+    if (!isActive) {
+      alert("W wybranym terminie łóżko nie jest dostępne!");
+    }
+    return isActive;
+  }
+
+  function activeAt(bed, period) {
+    const activenessPeriods = _.chunk([bed.addedAt, ..._.flatMap(bed.removingPeriods, $ => [$.from, $.to]), bed.removedAt]
+      .filter($ => $)
+      .sort($ => $)
+      .map($ => moment($)), 2)
+      .map($ => ({from: $[0], to: $[1]}))
+    return _.some(activenessPeriods, activePeriod =>
+      activePeriod.from.isSameOrBefore(period.from) && (!activePeriod.to || activePeriod.to.isSameOrAfter(period.to)))
+  }
+
+  function confirmAndThen(removeAction) {
+    if (confirm("Na pewno usunąć?")) {
+      removeAction();
+    }
+  }
+
+  async function removeOccupation(id) {
+    await occupationService.remove(id);
+    await loadOccupations();
+  }
+
+  return (
+    <div className="mt-5">
+      {
+        !managedOccupation ? null :
+          <div className="container" style={{maxWidth: "500px"}}>
+            <Section>Hospitalizacja</Section>
+            <DateTimeRangePicker label="Termin" start={managedOccupation.from} end={managedOccupation.to} disabled={dateRange}
+                                 onChange={(start, end) => setManagedOccupation({...managedOccupation, from: start, to: end})} />
+            <Select label="Szpital" options={hospitals} value={managedOccupation.hospitalId}
+                    onChange={$ => setManagedOccupation({...managedOccupation, hospitalId: $, departmentId: null, bedId: null})}
+                    nameMapper={$ => $.name} valueMapper={$ => $.id} disabled={hospitalId}/>
+            <Select label="Oddział" options={departments.filter($ => _.includes($.hospitals, managedOccupation.hospitalId))}
+                    value={managedOccupation.departmentId} onChange={$ => setManagedOccupation({...managedOccupation, departmentId: $, bedId: null})}
+                    nameMapper={$ => $.name} valueMapper={$ => $.id} disabled={departmentId}/>
+            <Select label="Łóżko" options={beds} value={managedOccupation.bedId}
+                    onChange={$ => managedOccupation.bedId = $}
+                    nameMapper={$ => $.number} valueMapper={$ => $.number} disabled={bedId || !managedOccupation.from || !managedOccupation.hospitalId || !managedOccupation.departmentId}/>
+            <Textarea label="Opis" onChange={$ => managedOccupation.description = $} value={managedOccupation.description} />
+            <div className="text-center mt-3">
+              <button className="btn btn-primary" onClick={() => {saveManagedOccupation()}}
+                      disabled={!managedOccupation.bedId || !managedOccupation.pesel || !managedOccupation.from || !managedOccupation.hospitalId || !managedOccupation.departmentId}>
+                Zapisz
+              </button>
+            </div>
+          </div>
+      }
+      <div className="container" style={{maxWidth: "500px"}}>
+        <Section>Historia</Section>
+        {
+          occupations.map(occupation => (
+            <table className="table mb-3" style={{border: "1px solid darkgray"}}>
+              <tr>
+                <th>Okres</th>
+                <td>{occupation.from} - {occupation.to}</td>
+              </tr>
+              <tr>
+                <th>Szpital</th>
+                <td>{hospitals.filter($ => $.id === occupation.hospitalId)[0].name}</td>
+              </tr>
+              <tr>
+                <th>Oddział</th>
+                <td>{departments.filter($ => $.id === occupation.departmentId)[0].name}</td>
+              </tr>
+              <tr>
+                <th>Łóżko</th>
+                <td>{occupation.bedId}</td>
+              </tr>
+              <tr>
+                <th>Opis</th>
+                <td><pre>{occupation.description}</pre></td>
+              </tr>
+              <tr style={bedId ? {display: "none"} : {}}>
+                <th>Akcje</th>
+                <td>
+                  <button className="btn btn-danger mr-3" onClick={() => confirmAndThen(() => removeOccupation(occupation.id))}>Usuń</button>
+                  <button className="btn btn-primary mr-3" onClick={() => {setManagedOccupation(occupation)}}>Edytuj</button>
+                </td>
+              </tr>
+            </table>
+          ))
+        }
       </div>
     </div>
   )

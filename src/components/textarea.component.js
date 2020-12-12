@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react";
 
 
-export default function Input({value, onChange = () => {}, label, type = "text", customLabelWidth = "75px", disabled = false}) {
+export default function Textarea({value, onChange = () => {}, label, customLabelWidth = "75px", disabled = false}) {
   const [currentValue, setCurrentValue] = useState(value);
 
   useEffect(() => {
@@ -20,7 +20,8 @@ export default function Input({value, onChange = () => {}, label, type = "text",
         <div className="input-group-prepend">
           <div className="input-group-text" style={{width: customLabelWidth}}>{label}</div>
         </div>
-        <input type={type} disabled={disabled} className="form-control" value={currentValue} onChange={e => updateValue(e.target.value)} />
+        <textarea disabled={disabled} className="form-control" value={currentValue} onChange={e => updateValue(e.target.value)}>
+        </textarea>
       </div>
     </div>
   )

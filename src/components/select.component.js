@@ -1,12 +1,13 @@
 import React, {useState, useEffect} from "react";
 
 
-export default function Select({value, onChange, label, options, valueMapper, nameMapper, customLabelWidth = "75px"}) {
+export default function Select({value, onChange, label, options, valueMapper, nameMapper, customLabelWidth = "75px",
+                                disabled = false}) {
   const [currentValue, setCurrentValue] = useState(value);
 
   useEffect(() => {
     setCurrentValue(value);
-  }, [value])
+  }, [options, value])
 
   function updateValue(value) {
     setCurrentValue(value);
@@ -20,7 +21,7 @@ export default function Select({value, onChange, label, options, valueMapper, na
         <div className="input-group-prepend">
           <div className="input-group-text" style={{width: customLabelWidth}}>{label}</div>
         </div>
-        <select className="form-control" value={currentValue} onChange={e => updateValue(e.target.value)}>
+        <select className="form-control" value={currentValue} onChange={e => updateValue(e.target.value)} disabled={disabled}>
           {
             options.map($ => <option value={valueMapper($)}>{nameMapper($)}</option>)
           }

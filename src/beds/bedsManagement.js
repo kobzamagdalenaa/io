@@ -20,13 +20,13 @@ export default function BedsManagement() {
       <Route exact path={path}>
         <DepartmentsList/>
       </Route>
-      <Route path={`${url}/:departmentId/:hospitalId/:bedId/:dateRange`}>
+      <Route path={`${path}/:departmentId/:hospitalId/:bedId/:dateRange`}>
         <Reservation/>
       </Route>
-      <Route path={`${url}/:departmentId/:hospitalId`}>
+      <Route path={`${path}/:departmentId/:hospitalId`}>
         <Beds/>
       </Route>
-      <Route path={`${url}/:departmentId`}>
+      <Route path={`${path}/:departmentId`}>
         <HospitalsList/>
       </Route>
     </Switch>
@@ -83,7 +83,7 @@ function DepartmentsList() {
 function HospitalsList() {
   const history = useHistory();
   const { path, url } = useRouteMatch();
-  const [department, setDepartment] = useState([]);
+  const [department, setDepartment] = useState({});
   const [hospitals, setHospitals] = useState([]);
   const { departmentId } = useParams();
 
@@ -331,7 +331,7 @@ function DepartmentManagement({department, onBack}) {
         </DateRangePicker>
       </div>
       <div id="chartdiv" style={{height: Math.min(ganttChartData.length*25, 700) + "px"}}></div>
-      <div className="text-center" style={{marginTop: "50px"}}>
+      <div className="text-center mt-3">
         <button className="btn btn-light" style={{marginRight: "20px"}} onClick={() => onBack()}>Wróć</button>
       </div>
     </div>

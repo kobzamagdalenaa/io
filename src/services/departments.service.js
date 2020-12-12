@@ -1,6 +1,4 @@
 import {db} from "../db";
-import {extractAllWithId, extractWithId, omitId} from "./dbObjectsUtilities";
-import accountService from "./account.service";
 import * as _ from "lodash";
 
 class DepartmentsService {
@@ -9,22 +7,28 @@ class DepartmentsService {
   }
 
   async loadAll() {
-    const query = await db.collection("departments").get();
-    return extractAllWithId(query);
+    return (await db.collection("departments").get()).docs.map($ => $.data());
   }
 
   async load(id) {
-    const query = await db.collection("departments").doc(id).get();
-    return extractWithId(query);
+    return (await db.collection("departments").doc(id).get()).data();
   }
 
   async loadForHospital(hospitalId) {
-    const query = await db.collection("departments").where("hospitals", "array-contains", hospitalId).get();
-    return extractAllWithId(query);
+    return (await db.collection("departments").where("hospitals", "array-contains", hospitalId).get()).docs.map($ => $.data());
   }
 
-  async upsert(id, department) {
-    await db.collection("departments").doc(id).set(omitId(department));
+  async upsert(department) {
+    department.id = department.id || await nextId();
+    await db.collection("departments").doc(id).set(department);
+  }
+
+  async nextId() {
+    const departments = await this.loadAll();
+    return departments.length === 0 ? "1" : "" + (_.chain(departments)
+      .map(departments => departments.id)
+      .map(id => +id)
+      .max() + 1);
   }
 
   async remove(id) {
@@ -34,7 +38,7 @@ class DepartmentsService {
   async removeHospitalFrom(departmentId, hospitalId) {
     const department = await this.load(departmentId);
     department.hospitals = _.remove(department.hospitals, hospitalId);
-    await this.upsert(department.id, department);
+    await this.upsert(department);
   }
 
   async removeHospitalFromAll(hospitalId) {
@@ -48,7 +52,7 @@ class DepartmentsService {
     const department = await this.load(departmentId);
     if (!_.includes(department.hospitals, hospitalId)) {
       department.hospitals.push(hospitalId);
-      await this.upsert(department.id, department);
+      await this.upsert(department);
     }
   }
 

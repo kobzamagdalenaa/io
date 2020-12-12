@@ -2,9 +2,32 @@ import React, {useEffect, useState} from 'react';
 import * as _ from "lodash";
 import Input from "../components/input.component";
 import departmentsService from "../services/departments.service";
+import {Route, Switch, useHistory, useParams, useRouteMatch} from "react-router-dom";
 
 export default function DepartmentsManagement() {
-  const [managedDepartment, setManagedDepartment] = useState();
+  const {path, url} = useRouteMatch();
+
+  return (
+    <div className="w-100 px-3">
+      <h2 className="text-center">Zarządzanie oddziałami</h2>
+      <Switch>
+        <Route exact path={path}>
+          <DepartmentsList/>
+        </Route>
+        <Route path={`${path}/add`}>
+          <AddOrEditDepartment/>
+        </Route>
+        <Route path={`${path}/:departmentId`}>
+          <AddOrEditDepartment/>
+        </Route>
+      </Switch>
+    </div>
+  )
+}
+
+function DepartmentsList() {
+  const history = useHistory();
+  const {path, url} = useRouteMatch();
   const [departments, setDepartments] = useState([]);
 
   useEffect(() => {
@@ -14,6 +37,32 @@ export default function DepartmentsManagement() {
   async function reloadDepartments() {
     setDepartments(await departmentsService.loadAll());
   }
+
+  return (
+    <div style={{display: "flex", flexWrap: "wrap"}}>
+      {
+        departments.map(department => <DepartmentTile department={department}
+                                                      onClick={() => history.push(`${url}/${department.id}`)}/>)
+      }
+      <DepartmentTile department={{name: "+", extra: "Dodaj nowy"}} onClick={() => history.push(`${url}/add`)}/>
+    </div>
+  )
+}
+
+function AddOrEditDepartment() {
+  const history = useHistory();
+  const { departmentId } = useParams();
+  const [managedDepartment, setManagedDepartment] = useState({hospitals: []});
+
+  async function loadDepartment(departmentId) {
+    setManagedDepartment(await departmentsService.load(departmentId));
+  }
+
+  useEffect(() => {
+    if (departmentId) {
+      loadDepartment(departmentId);
+    }
+  }, [departmentId]);
 
   function verify(department) {
     const errors = [
@@ -31,48 +80,25 @@ export default function DepartmentsManagement() {
     if (!verify(managedDepartment)) {
       return;
     }
-    await departmentsService.upsert(managedDepartment.id || nextId(), managedDepartment);
-    setManagedDepartment(undefined);
-    await reloadDepartments();
-  }
-
-  function nextId() {
-    return departments.length === 0 ? "1" : "" + (_.chain(departments)
-      .map(departments => departments.id)
-      .map(id => +id)
-      .max() + 1);
+    await departmentsService.upsert(managedDepartment);
+    history.goBack();
   }
 
   async function removeDepartment(department) {
     if (confirm(`Czy na pewno chcesz usunąć ${department.name}?`)) {
       await departmentsService.remove(department.id);
-      setManagedDepartment(undefined);
-      await reloadDepartments();
+      history.goBack();
     }
   }
 
   return (
-    <div className="w-100 px-3">
-      <h2 className="text-center">Zarządzanie oddziałami</h2>
-      {
-        managedDepartment ? (
-          <div className="container" style={{maxWidth: "500px"}}>
-            <DepartmentManagement department={managedDepartment} />
-            <div className="text-center" style={{marginTop: "50px"}}>
-              <button className="btn btn-light" style={{marginRight: "20px"}} onClick={() => setManagedDepartment(undefined)}>Anuluj</button>
-              {managedDepartment.id ? <button className="btn btn-danger" style={{marginRight: "20px"}} onClick={() => removeDepartment(managedDepartment)}>Usuń</button> : ''}
-              <button className="btn btn-primary" onClick={() => saveManagedDepartment()}>Zapisz</button>
-            </div>
-          </div>
-        ) : (
-          <div style={{display: "flex", flexWrap: "wrap"}}>
-            {
-              departments.map(department => <DepartmentTile department={department} onClick={() => setManagedDepartment(_.assign({}, department))} />)
-            }
-            <DepartmentTile department={{name: "+", extra: "Dodaj nowy"}} onClick={() => setManagedDepartment({name: "", hospitals: []})} />
-          </div>
-        )
-      }
+    <div className="container" style={{maxWidth: "500px"}}>
+      <DepartmentManagement department={managedDepartment} />
+      <div className="text-center mt-3">
+        <button className="btn btn-light" style={{marginRight: "20px"}} onClick={() => history.goBack()}>Anuluj</button>
+        {managedDepartment.id ? <button className="btn btn-danger" style={{marginRight: "20px"}} onClick={() => removeDepartment(managedDepartment)}>Usuń</button> : ''}
+        <button className="btn btn-primary" onClick={() => saveManagedDepartment()}>Zapisz</button>
+      </div>
     </div>
   )
 }

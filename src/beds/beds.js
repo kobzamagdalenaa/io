@@ -5,39 +5,85 @@ import * as _ from "lodash";
 import moment from "moment";
 import Timeline from "react-calendar-timeline";
 import Input from "../components/input.component";
+import DateTimeRangePicker from "../components/dateTimeRangePicker.component";
+import occupationService from "../services/occupations.service";
 
 export default function Beds() {
   const history = useHistory();
   const { path, url } = useRouteMatch();
   const { departmentId, hospitalId } = useParams();
   const [beds, setBeds] = useState([]);
+  const [removings, setRemovings] = useState([]);
   const [occupations, setOccupations] = useState([]);
   const [allOccupations, setAllOccupations] = useState([]);
   const [customOccupation, setCustomOccupation] = useState({});
 
   useEffect(() => {
-    setAllOccupations([...occupations, customOccupation].filter($ => $.start_time));
-  }, [occupations, customOccupation])
+    loadOccuptaions();
+    loadBeds();
+  }, []);
+
+  useEffect(() => {
+    setAllOccupations([...occupations, ...removings, customOccupation].filter($ => $.start_time));
+  }, [occupations, removings, customOccupation])
 
   async function loadBeds() {
     const allBeds = await bedsService.loadAll(hospitalId, departmentId);
 
     setBeds(_.map(allBeds, $ => ({id: $.id.split("_")[1], title: $.id.split("_")[1]})));
-    setOccupations(preprocess(allBeds));
-    console.log(preprocess(allBeds));
+    setRemovings(preprocess(allBeds));
   }
 
-  function updateOccupation(groupId, startTime) {
+  async function loadOccuptaions() {
+    const occupations = await occupationService.loadAll(hospitalId, departmentId);
+
+    setOccupations(occupations.map(occupation => ({
+      id: occupation.id,
+      group: occupation.bedId,
+      start_time: moment(occupation.from),
+      end_time: moment(occupation.to),
+      title: "Pacjent",
+      canMove: false,
+      canResize: false,
+      canChangeGroup: false,
+      selectedBgColor: 'rgba(255,213,17,0.7)',
+      bgColor: 'rgb(255,212,16)'
+    })))
+  }
+
+  function updateOccupationFromChart(startTime, groupId) {
     setCustomOccupation({
       id: "custom",
-      group: groupId,
+      group: groupId ? groupId : customOccupation.group,
       start_time: moment(startTime),
       end_time: customOccupation.end_time ?
         moment(startTime).add(moment.duration(customOccupation.end_time.diff(customOccupation.start_time))) :
         moment(startTime).add(4, "days"),
-      bgColor: 'rgb(0,255,123)'
+      selectedBgColor: 'rgba(0,255,125,0.7)',
+      bgColor: 'rgba(0,255,123,0.7)'
     })
-    console.log(customOccupation);
+  }
+
+  function extendOccupationFromChart(endTime) {
+    setCustomOccupation({
+      id: "custom",
+      group: customOccupation.group,
+      start_time: customOccupation.start_time,
+      end_time: moment(endTime).isAfter(customOccupation.start_time) ? moment(endTime) : customOccupation.end_time,
+      selectedBgColor: 'rgba(0,255,125,0.7)',
+      bgColor: 'rgba(0,255,123,0.7)'
+    })
+  }
+
+  function updateOccupationFromDatePicker(startTime, endTime) {
+    setCustomOccupation({
+      id: "custom",
+      group: customOccupation.group,
+      start_time: moment(startTime),
+      end_time: moment(endTime),
+      selectedBgColor: 'rgba(0,255,125,0.7)',
+      bgColor: 'rgba(0,255,123,0.7)'
+    })
   }
 
   function preprocess(beds) {
@@ -50,17 +96,17 @@ export default function Beds() {
     });
   }
 
-  useEffect(() => {
-    loadBeds();
-  }, []);
-
   function createUnavailableChartData(id, from, to) {
     return {
       id: `${id}_${from}_${to}`,
       group: id.split("_")[1],
       title: 'niedostępne',
-      start_time: moment(from, "YYYY-MM-DD hh:mm"),
-      end_time: moment(to, "YYYY-MM-DD hh:mm"),
+      start_time: moment(from, "YYYY-MM-DD HH:mm:ss"),
+      end_time: moment(to, "YYYY-MM-DD HH:mm:ss"),
+      canMove: false,
+      canResize: false,
+      canChangeGroup: false,
+      selectedBgColor: 'rgba(124, 124, 124, 1)',
       bgColor: 'rgba(125, 125, 125, 1)'
     }
   }
@@ -68,20 +114,30 @@ export default function Beds() {
   return (
     <div>
       <h2 className="text-center">Lista łóżek:</h2>
-      <div className="container" style={{maxWidth: "500px"}}>
-        <span>{customOccupation.start_time ? `Od ${customOccupation.start_time.format("YYYY-MM-DD hh:mm")} do ${customOccupation.end_time.format("YYYY-MM-DD hh:mm")}` : ""}</span>
-        <button disabled={!customOccupation.start_time} onClick={() => history.push(`${url}/${customOccupation.group}/${customOccupation.start_time.format("YYYYMMDDhhmm")}_${customOccupation.end_time.format("YYYYMMDDhhmm")}`)}>Dalej</button>
+      <div className="container" style={{maxWidth: "700px"}}>
+        <div className="row">
+          <div className="col-9">
+            <DateTimeRangePicker
+              start={customOccupation.start_time?.format("YYYY-MM-DD HH:mm:ss")}
+              end={customOccupation.end_time?.format("YYYY-MM-DD HH:mm:ss")}
+              onChange={(start, end) => updateOccupationFromDatePicker(start, end)}
+              label="Rezerwacja" customLabelWidth="100px"/>
+          </div>
+          <button className="col-2 btn btn-primary float-right mb-2" disabled={!customOccupation.start_time || !customOccupation.group} onClick={() => history.push(`${url}/${customOccupation.group}/${customOccupation.start_time.format("YYYYMMDDHHmmss")}_${customOccupation.end_time.format("YYYYMMDDHHmmss")}`)}>Dalej</button>
+        </div>
       </div>
       {!beds.length || !allOccupations.length ? "" : (
         <Timeline
         groups={beds}
         items={allOccupations}
-        onCanvasDoubleClick={updateOccupation}
-        defaultTimeStart={moment().add(-4, 'hour')}
-        defaultTimeEnd={moment().add(24, 'hour')}
+        onCanvasDoubleClick={(groupId, time) => updateOccupationFromChart(time, groupId)}
+        onItemResize={(itemId, time, edge) => {edge === "right" ? extendOccupationFromChart(time) : updateOccupationFromChart(time)}}
+        onItemMove={(itemId, time, groupIndex) => {updateOccupationFromChart(time, beds[groupIndex].id)}}
+        defaultTimeStart={moment().add(-12, 'hour')}
+        defaultTimeEnd={moment().add(7*24-12, 'hour')}
         itemRenderer={({ item, timelineContext, itemContext, getItemProps, getResizeProps }) => {
           const { left: leftResizeProps, right: rightResizeProps } = getResizeProps();
-          const backgroundColor = itemContext.selected ? (itemContext.dragging ? "red" : item.selectedBgColor) : item.bgColor;
+          const backgroundColor = itemContext.selected ? item.selectedBgColor : item.bgColor;
           const borderColor = itemContext.resizing ? "red" : item.color;
           return (
             <div
@@ -95,9 +151,6 @@ export default function Beds() {
                   borderRadius: 4,
                   borderLeftWidth: itemContext.selected ? 3 : 1,
                   borderRightWidth: itemContext.selected ? 3 : 1
-                },
-                onMouseDown: () => {
-                  console.log("on item click", item);
                 }
               })}
             >

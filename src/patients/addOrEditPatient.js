@@ -52,7 +52,7 @@ export default function AddOrEditPatient() {
         if (!verify(patient)) {
             return;
         }
-        await patientService.upsert(patient.pesel, patient);
+        await patientService.upsert(patient);
         history.goBack();
     }
 
@@ -66,7 +66,7 @@ export default function AddOrEditPatient() {
                 <Radio label="Płeć" name="gender" selected={patient.gender} onChange={v => patient.gender = v} customLabelWidth="110px" values={["Kobieta", "Mężczyzna"]} />
                 <Input label="Adres email" value={patient.email} onChange={v => patient.email = v} type="text" customLabelWidth="110px" />
             </div>
-            <div className="text-center" style={{marginTop: "50px"}}>
+            <div className="text-center mt-3">
                 <button className="btn btn-light" style={{marginRight: "20px"}} onClick={() => history.goBack()}>Anuluj</button>
                 {/*{managedDepartment.id ? <button className="btn btn-danger" style={{marginRight: "20px"}} onClick={() => removeDepartment(managedDepartment)}>Usuń</button> : ''}*/}
                 <button className="btn btn-primary" onClick={() => save()}>Zapisz</button>

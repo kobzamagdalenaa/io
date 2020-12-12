@@ -1,6 +1,6 @@
 import {db} from "../db";
-import {extractAllWithId, extractWithId, omitId} from "./dbObjectsUtilities";
 import departmentsService from "./departments.service";
+import * as _ from "lodash";
 
 class HospitalsService {
 
@@ -8,18 +8,26 @@ class HospitalsService {
   }
 
   async load(id) {
-    const query = await db.collection("hospitals").doc(id).get();
-    return extractWithId(query);
+    return (await db.collection("hospitals").doc(id).get()).data();
   }
 
   async loadAll() {
-    const query = await db.collection("hospitals").get();
-    return extractAllWithId(query);
+    return (await db.collection("hospitals").get()).docs.map($ => $.data());
   }
 
-  async upsert(id, hospital) {
-    await db.collection("hospitals").doc(id).set(omitId(hospital));
+  async upsert(hospital) {
+    hospital.id = hospital.id || await this.nextId();
+    await db.collection("hospitals").doc(hospital.id).set(hospital);
   }
+
+  async nextId() {
+    const hospitals = await this.loadAll();
+    return hospitals.length === 0 ? "PL1" : "PL" + (_.chain(hospitals)
+      .map(hospital => hospital.id)
+      .map(id => +id.substr(2))
+      .max() + 1);
+  }
+
 
   async remove(id) {
     await db.collection("hospitals").doc(id).delete();

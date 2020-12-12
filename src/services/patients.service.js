@@ -1,5 +1,4 @@
 import {db} from "../db";
-import {extractAllWithId, extractWithId, omitId} from "./dbObjectsUtilities";
 
 class PatientService {
 
@@ -7,15 +6,16 @@ class PatientService {
     }
 
     async load(id) {
-        return extractWithId(await db.collection("patients").doc(id).get());
+        return (await db.collection("patients").doc(id).get()).data();
     }
 
     async loadAll() {
-        return extractAllWithId(await db.collection("patients").get());
+        return (await db.collection("patients").get()).docs.map($ => $.data());
     }
 
-    async upsert(id, patient) {
-        await db.collection("patients").doc(id).set(omitId(patient));
+    async upsert(patient) {
+        patient.id = patient.pesel;
+        await db.collection("patients").doc(patient.id).set(patient);
     }
 }
 

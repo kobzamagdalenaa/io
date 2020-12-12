@@ -15,7 +15,9 @@ import HospitalDepartmentsManagement from "./hospitals/hospitalDepartmentsManage
 import BedsManagement from "./beds/bedsManagement";
 import '../style.css';
 import AddPatient from "./patients/addOrEditPatient";
-
+import 'moment/locale/pl';
+import * as moment from "moment";
+moment.locale('pl');
 
 render(<Root/>, document.getElementById('root'));
 
