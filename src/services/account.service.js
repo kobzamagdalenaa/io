@@ -1,11 +1,11 @@
 class AccountService {
 
   constructor() {
-    this.login = "jkowalski"
-    this.hospital = {
-      id: "PL1",
-      name: "cokolwiek"
-    }
+    // this.login = "jkowalski"
+    // this.hospital = {
+    //   id: "PL1",
+    //   name: "cokolwiek"
+    // }
   }
 
   loginAs(login, password) {
