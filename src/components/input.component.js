@@ -1,8 +1,12 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 
 
-export default function Input({value, onChange, label, type, customLabelWidth = "75px"}) {
+export default function Input({value, onChange, label, type, customLabelWidth = "75px", disabled = false}) {
   const [currentValue, setCurrentValue] = useState(value);
+
+  useEffect(() => {
+    setCurrentValue(value);
+  }, [value])
 
   function updateValue(value) {
     setCurrentValue(value);
@@ -16,7 +20,7 @@ export default function Input({value, onChange, label, type, customLabelWidth = 
         <div className="input-group-prepend">
           <div className="input-group-text" style={{width: customLabelWidth}}>{label}</div>
         </div>
-        <input type={type} className="form-control" value={currentValue} onChange={e => updateValue(e.target.value)} />
+        <input type={type} disabled={disabled} className="form-control" value={currentValue} onChange={e => updateValue(e.target.value)} />
       </div>
     </div>
   )

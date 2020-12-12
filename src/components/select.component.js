@@ -1,8 +1,12 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 
 
 export default function Select({value, onChange, label, options, valueMapper, nameMapper, customLabelWidth = "75px"}) {
   const [currentValue, setCurrentValue] = useState(value);
+
+  useEffect(() => {
+    setCurrentValue(value);
+  }, [value])
 
   function updateValue(value) {
     setCurrentValue(value);

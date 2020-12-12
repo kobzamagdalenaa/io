@@ -1,10 +1,15 @@
 import {db} from "../db";
-import {extractAllWithId, omitId} from "./dbObjectsUtilities";
+import {extractAllWithId, extractWithId, omitId} from "./dbObjectsUtilities";
 import departmentsService from "./departments.service";
 
 class HospitalsService {
 
   constructor() {
+  }
+
+  async load(id) {
+    const query = await db.collection("hospitals").doc(id).get();
+    return extractWithId(query);
   }
 
   async loadAll() {

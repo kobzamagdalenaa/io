@@ -10,7 +10,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -27,7 +27,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -44,7 +44,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -61,7 +61,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -78,7 +78,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -95,7 +95,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -112,7 +112,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -129,7 +129,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -146,7 +146,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -163,7 +163,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -180,7 +180,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -197,7 +197,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -214,7 +214,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -231,7 +231,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -248,7 +248,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -265,7 +265,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -282,7 +282,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -299,7 +299,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -316,7 +316,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -333,7 +333,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -350,7 +350,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -367,7 +367,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -384,7 +384,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -401,7 +401,7 @@ class BedsService {
         hospital: "PL1",
         department: "4",
         addedAt: "2020-06-01 00:00",
-        removedAt: "2020-10-10 12:00",
+        removedAt: "2020-12-12 12:00",
         removingPeriods: [
           {
             from: "2020-08-01 00:00",
@@ -416,7 +416,7 @@ class BedsService {
     ]
   }
 
-  async loadAll() {
+  async loadAll(hospitalId, departmentId) {
     return this.beds;
   }
 

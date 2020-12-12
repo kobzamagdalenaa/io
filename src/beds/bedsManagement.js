@@ -1,13 +1,127 @@
 import React, {useEffect, useState} from 'react';
 import * as _ from "lodash";
 import accountService from "../services/account.service";
-import * as am4core from "@amcharts/amcharts4/core";
-import * as am4charts from "@amcharts/amcharts4/charts";
-import am4lang_pl_PL from "@amcharts/amcharts4/lang/pl_PL";
 import departmentsService from "../services/departments.service";
+import {Route, Switch, useParams, useRouteMatch} from "react-router-dom";
+import AddOrEditPatient from "../patients/addOrEditPatient";
+import {useHistory} from "react-router-dom";
+import hospitalsService from "../services/hospitals.service";
+import Timeline from 'react-calendar-timeline';
 import moment from "moment";
 import bedsService from "../services/beds.service";
-import DateRangePicker from "react-bootstrap-daterangepicker";
+import Beds from "./beds"
+import Patients from "../patients/patients";
+
+export default function BedsManagement() {
+  const {path, url} = useRouteMatch();
+
+  return (
+    <Switch>
+      <Route exact path={path}>
+        <DepartmentsList/>
+      </Route>
+      <Route path={`${url}/:departmentId/:hospitalId/:bedId/:dateRange`}>
+        <Reservation/>
+      </Route>
+      <Route path={`${url}/:departmentId/:hospitalId`}>
+        <Beds/>
+      </Route>
+      <Route path={`${url}/:departmentId`}>
+        <HospitalsList/>
+      </Route>
+    </Switch>
+  )
+}
+
+function Reservation() {
+  const history = useHistory();
+  const { path, url } = useRouteMatch();
+  const { departmentId, hospitalId, bedId, dateRange } = useParams();
+
+  return (
+    <Patients/>
+  )
+}
+
+function DepartmentsList() {
+  const history = useHistory();
+  const { path, url } = useRouteMatch();
+  const [otherDepartments, setOtherDepartments] = useState([]);
+  const [myDepartments, setMyDepartments] = useState([]);
+
+  useEffect(() => {
+    reloadDepartments();
+  }, []);
+
+  async function reloadDepartments() {
+    const [allDepartments, myDepartments] = await Promise.all([
+      departmentsService.loadAll(),
+      departmentsService.loadForHospital(accountService.hospital.id)
+    ]);
+
+    setMyDepartments(myDepartments);
+    setOtherDepartments(_.remove(allDepartments, $ => _.filter(myDepartments, $$ => $$.id === $.id).length === 0));
+  }
+
+  return (
+    <div>
+      <h2 className="text-center">Oddziały:</h2>
+      <div style={{display: "flex", flexWrap: "wrap"}}>
+        {
+          myDepartments.map(department => <Tile object={department} onClick={() => {history.push(`${url}/${department.id}`)}}/>)
+        }
+      </div>
+      <div style={{display: "flex", flexWrap: "wrap"}}>
+        {
+          otherDepartments.map(department => <Tile object={department} onClick={() => {history.push(`${url}/${department.id}`)}}/>)
+        }
+      </div>
+    </div>
+  )
+}
+
+function HospitalsList() {
+  const history = useHistory();
+  const { path, url } = useRouteMatch();
+  const [department, setDepartment] = useState([]);
+  const [hospitals, setHospitals] = useState([]);
+  const { departmentId } = useParams();
+
+  useEffect(() => {
+    reloadHospitals();
+  }, []);
+
+  async function reloadHospitals() {
+    const department = await departmentsService.load(departmentId);
+    setDepartment(department);
+    const hospitals = await Promise.all(_.map(department.hospitals, $ => hospitalsService.load($)));
+    setHospitals([..._.remove(hospitals, $ => $.id === accountService.hospital.id), ...hospitals]);
+  }
+
+  return (
+    <div>
+      <h2 className="text-center">Szpitale:</h2>
+      <div style={{display: "flex", flexWrap: "wrap"}}>
+        {
+          hospitals.map(hospital => <Tile object={hospital} onClick={() => {history.push(`${url}/${hospital.id}`)}}/>)
+        }
+      </div>
+    </div>
+  )
+}
+
+function Tile({object, onClick}) {
+
+  return (
+    <div style={{margin: "10px", width: "240px", height: "200px", border: "1px solid lightgray", cursor: "pointer"}}
+         onClick={onClick}>
+      <h5 className="text-center" style={{margin: "60px 0 10px"}}>{object.name}</h5>
+      <p className="text-center">{object.extra}</p>
+    </div>
+  )
+}
+
+/*
 
 export default function BedsManagement() {
   const [managedDepartment, setManagedDepartment] = useState();
@@ -223,3 +337,6 @@ function DepartmentManagement({department, onBack}) {
     </div>
   );
 }
+
+
+ */

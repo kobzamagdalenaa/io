@@ -14,6 +14,7 @@ import DepartmentsManagement from "./departments/departmentsManagement";
 import HospitalDepartmentsManagement from "./hospitals/hospitalDepartmentsManagement";
 import BedsManagement from "./beds/bedsManagement";
 import '../style.css';
+import AddPatient from "./patients/addOrEditPatient";
 
 
 render(<Root/>, document.getElementById('root'));
@@ -32,7 +33,6 @@ function Root() {
   }, []);
 
   return (
-
     <div>
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <a className="navbar-brand" href="#">NAZWA APLIAKCJI</a>
@@ -69,9 +69,9 @@ function App() {
             <li>
               <Link to="/">Home</Link>
             </li>
-            {/*<li>*/}
-            {/*  <Link to="/patients">Pacjenci</Link>*/}
-            {/*</li>*/}
+            <li>
+              <Link to="/patients">Pacjenci</Link>
+            </li>
             {/*<li>*/}
             {/*  <Link to="/users">Users</Link>*/}
             {/*</li>*/}

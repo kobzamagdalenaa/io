@@ -144,7 +144,6 @@ function DepartmentManagement({hospital}) {
 
   function removeDepartment(departmentId) {
     const newDepartments = _.filter(departments, $ => $.id !== departmentId);
-    console.log(departmentId, departments, newDepartments);
     setDepartments(newDepartments);
     hospital.departments = newDepartments;
   }

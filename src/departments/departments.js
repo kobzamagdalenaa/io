@@ -28,7 +28,6 @@ export default function DepartmentsView() {
       }
       departments[dep].push(hospital);
       const bedsIn = await loadFreeBedsIn(hospital, dep, "2020-11-14", "2020-11-15")
-      console.log(hospital.name, hospitalDepartments, bedsIn);
     }
   }
 
