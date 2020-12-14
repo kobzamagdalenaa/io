@@ -3,6 +3,9 @@ import * as _ from "lodash";
 import Input from "../components/input.component";
 import departmentsService from "../services/departments.service";
 import {Route, Switch, useHistory, useParams, useRouteMatch} from "react-router-dom";
+import occupationService from "../services/occupations.service";
+import moment from "moment";
+import bedsService from "../services/beds.service";
 
 export default function DepartmentsManagement() {
   const {path, url} = useRouteMatch();

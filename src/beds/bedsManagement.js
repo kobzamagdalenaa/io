@@ -11,6 +11,7 @@ import moment from "moment";
 import bedsService from "../services/beds.service";
 import Beds from "./beds"
 import Patients from "../patients/patients";
+import occupationService from "../services/occupations.service";
 
 export default function BedsManagement() {
   const {path, url} = useRouteMatch();
@@ -66,14 +67,16 @@ function DepartmentsList() {
   return (
     <div>
       <h2 className="text-center">Oddziały:</h2>
+      <p className="text-center">Oddziały w Twoim szpitalu:</p>
       <div style={{display: "flex", flexWrap: "wrap"}}>
         {
-          myDepartments.map(department => <Tile object={department} onClick={() => {history.push(`${url}/${department.id}`)}}/>)
+          myDepartments.map(department => <DepartmentTile object={department} onClick={() => {history.push(`${url}/${department.id}`)}}/>)
         }
       </div>
+      <p className="text-center">Oddziały innych szpitali:</p>
       <div style={{display: "flex", flexWrap: "wrap"}}>
         {
-          otherDepartments.map(department => <Tile object={department} onClick={() => {history.push(`${url}/${department.id}`)}}/>)
+          otherDepartments.map(department => <DepartmentTile object={department} onClick={() => {history.push(`${url}/${department.id}`)}}/>)
         }
       </div>
     </div>
@@ -84,7 +87,7 @@ function HospitalsList() {
   const history = useHistory();
   const { path, url } = useRouteMatch();
   const [department, setDepartment] = useState({});
-  const [hospitals, setHospitals] = useState([]);
+  const [hospitals, setHospitals] = useState();
   const { departmentId } = useParams();
 
   useEffect(() => {
@@ -101,21 +104,125 @@ function HospitalsList() {
   return (
     <div>
       <h2 className="text-center">Szpitale:</h2>
-      <div style={{display: "flex", flexWrap: "wrap"}}>
         {
-          hospitals.map(hospital => <Tile object={hospital} onClick={() => {history.push(`${url}/${hospital.id}`)}}/>)
+          hospitals === undefined ? "" : (
+            !hospitals.length ? <p className="text-center">Oddział nie istnieje w żadnym szpitalu.</p> :
+              <div style={{display: "flex", flexWrap: "wrap"}}>
+                {hospitals.map(hospital => <HospitalTile object={hospital} departmentId={departmentId} onClick={() => {history.push(`${url}/${hospital.id}`)}}/>)}
+              </div>
+          )
         }
-      </div>
     </div>
   )
 }
 
-function Tile({object, onClick}) {
+function DepartmentTile({object, onClick}) {
+  const [freeBeds, setFreeBeds] = useState();
+  const [allBeds, setAllBeds] = useState();
+  const [hospitals, setHospitals] = useState();
+
+  useEffect(() => {
+    loadHospitals();
+  }, [object]);
+
+  useEffect(() => {
+    if (hospitals) {
+      loadFreeBeds();
+    }
+  }, [hospitals]);
+
+  async function loadHospitals() {
+    const department = await departmentsService.load(object.id);
+    const hospitals = await Promise.all(_.map(department.hospitals, $ => hospitalsService.load($)));
+    setHospitals([..._.remove(hospitals, $ => $.id === accountService.hospital.id), ...hospitals]);
+  }
+
+  async function loadFreeBeds() {
+    let freeBeds = 0;
+    let allBeds = 0;
+    for (let hospital of hospitals) {
+      const hospitalId = hospital.id;
+      const beds = await bedsService.loadAll(hospitalId, object.id);
+      for (let bed of beds) {
+        if (activeNow(bed)) {
+          allBeds++;
+          const occupations = await occupationService.loadForBed(hospitalId, object.id, bed.number);
+          const colliding = occupations.filter($ => moment($.from).isSameOrBefore(moment()) && moment($.to).isSameOrAfter(moment()));
+          if (colliding.length === 0) {
+            freeBeds++;
+          }
+        }
+      }
+    }
+    setAllBeds(allBeds);
+    setFreeBeds(freeBeds);
+
+    function activeNow(bed) {
+      const activenessPeriods = _.chunk([bed.addedAt, ..._.flatMap(bed.removingPeriods, $ => [$.from, $.to]), bed.removedAt]
+        .filter($ => $)
+        .sort($ => $)
+        .map($ => moment($)), 2)
+        .map($ => ({from: $[0], to: $[1]}))
+      return _.some(activenessPeriods, activePeriod =>
+        activePeriod.from.isSameOrBefore(moment()) && (!activePeriod.to || activePeriod.to.isSameOrAfter(moment())))
+    }
+  }
 
   return (
     <div style={{margin: "10px", width: "240px", height: "200px", border: "1px solid lightgray", cursor: "pointer"}}
          onClick={onClick}>
       <h5 className="text-center" style={{margin: "60px 0 10px"}}>{object.name}</h5>
+      { freeBeds === undefined ? null : <p className="text-center">Wolnych {freeBeds}/{allBeds}</p> }
+      <p className="text-center">{object.extra}</p>
+    </div>
+  )
+}
+
+function HospitalTile({object, departmentId, onClick}) {
+  const [freeBeds, setFreeBeds] = useState();
+  const [allBeds, setAllBeds] = useState();
+
+  useEffect(() => {
+    if (departmentId) {
+      loadFreeBeds();
+    }
+  }, [departmentId])
+
+  async function loadFreeBeds() {
+    const hospitalId = object.id;
+    const beds = await bedsService.loadAll(hospitalId, departmentId);
+
+    let freeBeds = 0;
+    let allBeds = 0;
+    for (let bed of beds) {
+      if (activeNow(bed)) {
+        allBeds++;
+        const occupations = await occupationService.loadForBed(hospitalId, departmentId, bed.number);
+        const colliding = occupations.filter($ => moment($.from).isSameOrBefore(moment()) && moment($.to).isSameOrAfter(moment()));
+        if (colliding.length === 0) {
+          freeBeds++;
+        }
+      }
+    }
+    setAllBeds(allBeds);
+    setFreeBeds(freeBeds);
+
+    function activeNow(bed) {
+      const activenessPeriods = _.chunk([bed.addedAt, ..._.flatMap(bed.removingPeriods, $ => [$.from, $.to]), bed.removedAt]
+        .filter($ => $)
+        .sort($ => $)
+        .map($ => moment($)), 2)
+        .map($ => ({from: $[0], to: $[1]}))
+      return _.some(activenessPeriods, activePeriod =>
+        activePeriod.from.isSameOrBefore(moment()) && (!activePeriod.to || activePeriod.to.isSameOrAfter(moment())))
+    }
+  }
+
+  return (
+    <div style={{margin: "10px", width: "240px", height: "200px", border: "1px solid lightgray", cursor: "pointer"}}
+         onClick={onClick}>
+      <h5 className="text-center" style={{margin: "60px 0 10px"}}>{object.name}</h5>
+      { freeBeds === undefined ? null : <p className="text-center">Wolnych {freeBeds}/{allBeds}</p> }
       <p className="text-center">{object.extra}</p>
     </div>
   )
