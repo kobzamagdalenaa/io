@@ -20,7 +20,7 @@ class DepartmentsService {
 
   async upsert(department) {
     department.id = department.id || await nextId();
-    await db.collection("departments").doc(id).set(department);
+    await db.collection("departments").doc(department.id).set(department);
   }
 
   async nextId() {

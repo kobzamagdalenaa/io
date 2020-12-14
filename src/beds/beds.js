@@ -126,7 +126,10 @@ export default function Beds() {
           <button className="col-2 btn btn-primary float-right mb-2" disabled={!customOccupation.start_time || !customOccupation.group} onClick={() => history.push(`${url}/${customOccupation.group}/${customOccupation.start_time.format("YYYYMMDDHHmmss")}_${customOccupation.end_time.format("YYYYMMDDHHmmss")}`)}>Dalej</button>
         </div>
       </div>
-      {!beds.length || !allOccupations.length ? "" : (
+      {
+        !beds.length ? <p className="text-center">Na tym oddziale nie ma łóżek.</p> : null
+      }
+      {!beds || !beds.length || !allOccupations.length ? "" : (
         <Timeline
         groups={beds}
         items={allOccupations}
