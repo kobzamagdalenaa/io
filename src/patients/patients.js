@@ -12,6 +12,8 @@ import bedsService from "../services/beds.service";
 import DateTimeRangePicker from "../components/dateTimeRangePicker.component";
 import occupationService from "../services/occupations.service";
 import Textarea from "../components/textarea.component";
+import ReactDOM from "react-dom";
+import rescheduleService from "../services/reschedule.service";
 
 export default function Patients() {
   const { path, url } = useRouteMatch();
@@ -74,16 +76,17 @@ function ViewPatient() {
         {/*{managedDepartment.id ? <button className="btn btn-danger" style={{marginRight: "20px"}} onClick={() => removeDepartment(managedDepartment)}>Usuń</button> : ''}*/}
         <button className="btn btn-primary" onClick={() => history.push(`${url}/edit`)}>Edytuj</button>
       </div>
-      <PatientOccupations />
+      <PatientOccupations patient={patient} />
     </div>
   )
 }
 
-function PatientOccupations() {
+function PatientOccupations({patient}) {
   const history = useHistory();
   const { path, url } = useRouteMatch();
   const { pesel, departmentId, hospitalId, bedId, dateRange } = useParams();
   const [managedOccupation, setManagedOccupation] = useState();
+  const [printedOccupationId, setPrintedOccupationId] = useState();
   const [departments, setDepartments] = useState([]);
   const [hospitals, setHospitals] = useState([]);
   const [beds, setBeds] = useState([]);
@@ -143,16 +146,21 @@ function PatientOccupations() {
   }
 
   async function verifyNotCollidingWithOccupations() {
-    const occupations = await occupationService.loadForBed(managedOccupation.hospitalId, managedOccupation.departmentId, managedOccupation.bedId);
+    let occupations = await occupationService.loadForBed(managedOccupation.hospitalId, managedOccupation.departmentId, managedOccupation.bedId);
     const period = {
       from: moment(managedOccupation.from),
       to: moment(managedOccupation.to)
     }
-    const colliding = occupations.filter($ => $.id !== managedOccupation.id && moment($.from).isSameOrBefore(period.to) && moment($.to).isSameOrAfter(period.from));
-    console.log(colliding)
+    let colliding = occupations.filter($ => $.id !== managedOccupation.id && moment($.from).isSameOrBefore(period.to) && moment($.to).isSameOrAfter(period.from));
     if (colliding.length) {
-      alert("W wybranym terminie łóżko jest zajęte!");
+      if (confirm("W wybranym terminie łóżko jest zajęte!\nCzy jest to nagły przypadek i chcesz spróbować przeplanować wizyty?")) {
+        await rescheduleService.tryReschedule(managedOccupation);
+      } else {
+        return false;
+      }
     }
+    occupations = await occupationService.loadForBed(managedOccupation.hospitalId, managedOccupation.departmentId, managedOccupation.bedId);
+    colliding = occupations.filter($ => $.id !== managedOccupation.id && moment($.from).isSameOrBefore(period.to) && moment($.to).isSameOrAfter(period.from));
     return !colliding.length;
   }
 
@@ -190,6 +198,25 @@ function PatientOccupations() {
     await loadOccupations();
   }
 
+  function setPrintedOccupation(id) {
+    setPrintedOccupationId(id);
+  }
+
+  function mailto(occupation, hospital, department, patient) {
+    let mailto = `mailto:${patient.email}`
+    mailto += `?subject=` + encodeURIComponent(`Skierowanie ${hospital} - ${department} od ${occupation.from} do ${occupation.to}`)
+    mailto += `&body=` + encodeURIComponent(`
+Okres: ${occupation.from} - ${occupation.to}
+Szpital: ${hospital}
+Oddział ${department}
+Łóżko: ${occupation.bedId}
+Pacjent: ${patient.name} ${patient.surname}
+Pesel: ${patient.pesel}
+Opis: ${occupation.description}
+    `);
+    return mailto;
+  }
+
   return (
     <div className="mt-5">
       {
@@ -219,37 +246,66 @@ function PatientOccupations() {
       <div className="container" style={{maxWidth: "500px"}}>
         <Section>Historia</Section>
         {
-          occupations.map(occupation => (
-            <table className="table mb-3" style={{border: "1px solid darkgray"}}>
-              <tr>
-                <th>Okres</th>
-                <td>{occupation.from} - {occupation.to}</td>
-              </tr>
-              <tr>
-                <th>Szpital</th>
-                <td>{hospitals.filter($ => $.id === occupation.hospitalId)[0].name}</td>
-              </tr>
-              <tr>
-                <th>Oddział</th>
-                <td>{departments.filter($ => $.id === occupation.departmentId)[0].name}</td>
-              </tr>
-              <tr>
-                <th>Łóżko</th>
-                <td>{occupation.bedId}</td>
-              </tr>
-              <tr>
-                <th>Opis</th>
-                <td><pre>{occupation.description}</pre></td>
-              </tr>
-              <tr style={bedId ? {display: "none"} : {}}>
-                <th>Akcje</th>
-                <td>
-                  <button className="btn btn-danger mr-3" onClick={() => confirmAndThen(() => removeOccupation(occupation.id))}>Usuń</button>
-                  <button className="btn btn-primary mr-3" onClick={() => {setManagedOccupation(occupation)}}>Edytuj</button>
-                </td>
-              </tr>
-            </table>
-          ))
+          occupations.map(occupation => {
+            const hospital = hospitals.filter($ => $.id === occupation.hospitalId)[0].name;
+            const department = departments.filter($ => $.id === occupation.departmentId)[0].name;
+            return (
+              <table className="table mb-3" style={{border: "1px solid darkgray"}}>
+                <tr>
+                  <th>Okres</th>
+                  <td>{occupation.from} - {occupation.to}</td>
+                </tr>
+                <tr>
+                  <th>Szpital</th>
+                  <td>{hospital}</td>
+                </tr>
+                <tr>
+                  <th>Oddział</th>
+                  <td>{department}</td>
+                </tr>
+                <tr>
+                  <th>Łóżko</th>
+                  <td>{occupation.bedId}</td>
+                </tr>
+                <tr>
+                  <th>Opis</th>
+                  <td>
+                    <pre>{occupation.description}</pre>
+                  </td>
+                </tr>
+                <tr style={bedId ? {display: "none"} : {}}>
+                  <th rowSpan={2}>Akcje</th>
+                  <td>
+                    <button className="btn btn-danger mr-3" onClick={() => confirmAndThen(() => removeOccupation(occupation.id))}>Usuń
+                    </button>
+                    <button className="btn btn-primary mr-3" onClick={() => {
+                      setManagedOccupation(occupation)
+                    }}>Edytuj
+                    </button>
+                  </td>
+                </tr>
+                <tr style={bedId ? {display: "none"} : {}}>
+                  <td>
+                    {
+                      printedOccupationId === occupation.id ?
+                        <MyWindowPortal occupation={occupation}
+                                        hospital={hospital}
+                                        patient={patient}
+                                        department={department}
+                                        onClose={() => setPrintedOccupationId(-12432319)}/> :
+                        <button className="btn btn-info mr-3" onClick={() => {
+                          setPrintedOccupation(occupation.id)
+                        }}>Drukuj</button>
+                    }
+                    {
+                      patient.email ?
+                        <a href={mailto(occupation, hospital, department, patient)} className="btn btn-info mr-3">Wyślij email</a> : null
+                    }
+                  </td>
+                </tr>
+              </table>
+            );
+          })
         }
       </div>
     </div>
@@ -300,4 +356,77 @@ function PatientsList() {
       </div>
     </div>
   )
+}
+
+function Relegation({occupation, department, hospital, patient}) {
+
+  return (
+    <div className="container">
+      <table className="table mb-3" style={{border: "1px solid darkgray"}}>
+        <tr>
+          <th>Okres</th>
+          <td>{occupation.from} - {occupation.to}</td>
+        </tr>
+        <tr>
+          <th>Szpital</th>
+          <td>{hospital}</td>
+        </tr>
+        <tr>
+          <th>Oddział</th>
+          <td>{department}</td>
+        </tr>
+        <tr>
+          <th>Łóżko</th>
+          <td>{occupation.bedId}</td>
+        </tr>
+        <tr>
+          <th>Pacjent</th>
+          <td>{`${patient.name} ${patient.surname}`}</td>
+        </tr>
+        <tr>
+          <th>Pesel</th>
+          <td>{patient.pesel}</td>
+        </tr>
+        <tr>
+          <th>Opis</th>
+          <td>
+            <pre>{occupation.description}</pre>
+          </td>
+        </tr>
+      </table>
+    </div>
+  )
+}
+
+class MyWindowPortal extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    // STEP 1: create a container <div>
+    this.containerEl = document.createElement('div');
+    this.externalWindow = null;
+  }
+
+  render() {
+    // STEP 2: append props.children to the container <div> that isn't mounted anywhere yet
+    return ReactDOM.createPortal((<Relegation occupation={this.props.occupation}
+                                              department={this.props.department}
+                                              patient={this.props.patient}
+                                              hospital = {this.props.hospital}/>),
+      this.containerEl);
+  }
+
+  componentDidMount() {
+    // STEP 3: open a new browser window and store a reference to it
+    this.externalWindow = window.open('', '', 'width=600,height=400,left=200,top=200');
+
+    // STEP 4: append the container <div> (that has props.children appended to it) to the body of the new window
+    this.externalWindow.document.body.appendChild(this.containerEl);
+    this.externalWindow.addEventListener("beforeunload", this.props.onClose);
+  }
+
+  componentWillUnmount() {
+    // STEP 5: This will fire when this.state.showWindowPortal in the parent component becomes false
+    // So we tidy up by closing the window
+    this.externalWindow.close();
+  }
 }
