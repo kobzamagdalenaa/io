@@ -13,6 +13,7 @@ import DateTimeRangePicker from "../components/dateTimeRangePicker.component";
 import occupationService from "../services/occupations.service";
 import Textarea from "../components/textarea.component";
 import ReactDOM from "react-dom";
+import rescheduleService from "../services/reschedule.service";
 
 export default function Patients() {
   const { path, url } = useRouteMatch();
@@ -145,16 +146,21 @@ function PatientOccupations({patient}) {
   }
 
   async function verifyNotCollidingWithOccupations() {
-    const occupations = await occupationService.loadForBed(managedOccupation.hospitalId, managedOccupation.departmentId, managedOccupation.bedId);
+    let occupations = await occupationService.loadForBed(managedOccupation.hospitalId, managedOccupation.departmentId, managedOccupation.bedId);
     const period = {
       from: moment(managedOccupation.from),
       to: moment(managedOccupation.to)
     }
-    const colliding = occupations.filter($ => $.id !== managedOccupation.id && moment($.from).isSameOrBefore(period.to) && moment($.to).isSameOrAfter(period.from));
-    console.log(colliding)
+    let colliding = occupations.filter($ => $.id !== managedOccupation.id && moment($.from).isSameOrBefore(period.to) && moment($.to).isSameOrAfter(period.from));
     if (colliding.length) {
-      alert("W wybranym terminie łóżko jest zajęte!");
+      if (confirm("W wybranym terminie łóżko jest zajęte!\nCzy jest to nagły przypadek i chcesz spróbować przeplanować wizyty?")) {
+        await rescheduleService.tryReschedule(managedOccupation);
+      } else {
+        return false;
+      }
     }
+    occupations = await occupationService.loadForBed(managedOccupation.hospitalId, managedOccupation.departmentId, managedOccupation.bedId);
+    colliding = occupations.filter($ => $.id !== managedOccupation.id && moment($.from).isSameOrBefore(period.to) && moment($.to).isSameOrAfter(period.from));
     return !colliding.length;
   }
 
