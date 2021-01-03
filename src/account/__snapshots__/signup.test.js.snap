@@ -1,0 +1,149 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<SingUpForm /> Renders sign up form with initial values 1`] = `
+<div>
+  <form
+    id="registerForm"
+    onSubmit={[Function]}
+  >
+    <div
+      className="form-row justify-content-center align-items-baseline mt-3"
+    >
+      <div
+        className="form-group col-md-2 mr-4"
+      >
+        <div
+          className="row"
+        >
+          <label
+            className="sr-only"
+            htmlFor="inlineFormInputGroup"
+          >
+            Login
+          </label>
+          <div
+            className="input-group mb-2"
+          >
+            <div
+              className="input-group-prepend"
+            >
+              <div
+                className="input-group-text"
+              >
+                Login
+              </div>
+            </div>
+            <input
+              className="form-control"
+              name="login"
+              onChange={[Function]}
+              type="text"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        className="form-group col-md-2 mr-4"
+      >
+        <div
+          className="row"
+        >
+          <label
+            className="sr-only"
+            htmlFor="inlineFormInputGroup"
+          >
+            Hasło
+          </label>
+          <div
+            className="input-group mb-2"
+          >
+            <div
+              className="input-group-prepend"
+            >
+              <div
+                className="input-group-text"
+              >
+                Hasło
+              </div>
+            </div>
+            <input
+              className="form-control"
+              onChange={[Function]}
+              type="password"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        className="form-group col-md-2 mr-4"
+      >
+        <div
+          className="row"
+        >
+          <label
+            className="sr-only"
+            htmlFor="inlineFormInputGroup"
+          >
+            Imię
+          </label>
+          <div
+            className="input-group mb-2"
+          >
+            <div
+              className="input-group-prepend"
+            >
+              <div
+                className="input-group-text"
+              >
+                Imię
+              </div>
+            </div>
+            <input
+              className="form-control"
+              onChange={[Function]}
+              type="text"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        className="form-group col-md-2 mr-4"
+      >
+        <div
+          className="row"
+        >
+          <label
+            className="sr-only"
+            htmlFor="inlineFormInputGroup"
+          >
+            Nazwisko
+          </label>
+          <div
+            className="input-group mb-2"
+          >
+            <div
+              className="input-group-prepend"
+            >
+              <div
+                className="input-group-text"
+              >
+                Nazwisko
+              </div>
+            </div>
+            <input
+              className="form-control"
+              onChange={[Function]}
+              type="text"
+            />
+          </div>
+        </div>
+      </div>
+      <input
+        className="btn btn-info"
+        type="submit"
+        value="Zarejestruj"
+      />
+    </div>
+  </form>
+</div>
+`;
