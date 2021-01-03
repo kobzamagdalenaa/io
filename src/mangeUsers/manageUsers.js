@@ -158,7 +158,7 @@ function AdminManageUsers() {
           <th>Czy zarządca szpitala</th>
         </tr>
         {
-          allUsers.map(user => (
+          users.map(user => (
             <tr key={user.id}>
               <td>{user.id}</td>
               <td>{user.name}</td>
