@@ -14,7 +14,6 @@ import DepartmentsManagement from "./departments/departmentsManagement";
 import HospitalDepartmentsManagement from "./hospitals/hospitalDepartmentsManagement";
 import BedsManagement from "./beds/bedsManagement";
 import '../style.css';
-import AddPatient from "./patients/addOrEditPatient";
 import 'moment/locale/pl';
 import * as moment from "moment";
 moment.locale('pl');
@@ -24,18 +23,21 @@ render(<Root/>, document.getElementById('root'));
 function Root() {
   const [fullyLoggedId, setFullyLoggedIn] = useState(accountService.isFullyLoggedIn());
   const [loggedId, setLoggedIn] = useState(accountService.isLoggedIn());
+  const [refresher, refresh] = useState({})
 
   useEffect(() => {
     document.addEventListener('organizationChanged', () => {
       setFullyLoggedIn(accountService.isFullyLoggedIn());
+      refresh({})
     });
     document.addEventListener('loggedIn', () => {
       setLoggedIn(accountService.isLoggedIn());
+      refresh({})
     });
   }, []);
 
   return (
-    <div>
+    <div ref={refresher}>
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <a className="navbar-brand" href="#">NAZWA APLIAKCJI</a>
 
@@ -50,114 +52,75 @@ function Root() {
 }
 
 function App() {
-  const [isAdmin, setIsAdmin] = useState(false)
+  const pages = [
+    {name: "Pacjenci", link: "/patients", roles: ["doctor"], component: () => <Patients/>},
+    {name: "Oddziały szpitalne", link: "/departments", roles: ["doctor"], component: () => <BedsManagement/>},
+    {name: "Zarządzaj oddziałami szpitala", link: "/hospital-departments-management", roles: ["hospital_admin"], component: () => <HospitalDepartmentsManagement/>},
+    {name: "Zarządzaj szpitalami", link: "/hospitals-management", roles: ["admin"], component: () => <HospitalsManagement/>},
+    {name: "Zarządzaj słownikiem oddziałów", link: "/departments-management", roles: ["admin"], component: () => <DepartmentsManagement/>},
+    {name: "Zarządzaj użytkownikami", link: "/manage-users", roles: ["hospital_admin", "admin"], component: () => <ManageUsers/>},
+  ]
+  const page404 = {component: () => null};
+
+  const [roles, setRoles] = useState([]);
+  const [defaultComponent, setDefaultComponent] = useState(page404);
+
+
 
   useEffect(() => {
     document.addEventListener('organizationChanged', () => {
-      checkIfAdmin();
+      setRoles(accountService.roles);
     });
-    checkIfAdmin();
+    setRoles(accountService.roles);
   }, []);
 
-  function checkIfAdmin() {
-    setIsAdmin(_.includes(accountService.roles || [], 'admin'));
-  }
+  useEffect(() => {
+    const found = pages.filter(page => _.some(roles, role => _.includes(page.roles, role)));
+    setDefaultComponent(found.length ? found[0] : page404)
+  }, [roles])
 
   return (
-    <Router>
+    <Router ref={roles}>
       <div>
         <nav>
           <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/patients">Pacjenci</Link>
-            </li>
-            {/*<li>*/}
-            {/*  <Link to="/users">Users</Link>*/}
-            {/*</li>*/}
-            <li>
-              <Link to="/departments">Oddziały Szpitalne</Link>
-            </li>
-            <li>
-              <Link to="/hospital-departments-management">Zarządzaj oddziałami szpitala</Link>
-            </li>
-            <li>
-              <Link to="/hospitals-management">Zarządzaj Szpitalami</Link>
-            </li>
-            <li>
-              <Link to="/departments-management">Zarządzaj Słownikiem Oddziałów</Link>
-            </li>
-            {isAdmin ? (<li>
-              <Link to="/manage-users">Zarządzaj Użytkownikami</Link>
-            </li>) : ''}
+            {
+              pages.filter(page => _.some(roles, role => _.includes(page.roles, role)))
+                .map($ => <li><Link to={$.link}>{$.name}</Link></li>)
+            }
           </ul>
         </nav>
 
-        {/* A <Switch> looks through its children <Route>s and
-            renders the first one that matches the current URL. */}
         <Switch>
-          <Route path="/patients">
-            <Patients/>
-          </Route>
-          <Route path="/users">
-            <Users/>
-          </Route>
-          <Route path="/manage-users">
-            <ManageUsers/>
-          </Route>
-          <Route path="/hospital-departments-management">
-            <HospitalDepartmentsManagement />
-          </Route>
-          <Route path="/departments">
-            <BedsManagement />
-          </Route>
-          <Route path="/hospitals-management">
-            <HospitalsManagement />
-          </Route>
-          <Route path="/departments-management">
-            <DepartmentsManagement />
-          </Route>
-          <Route path="/">
-            <Home/>
-          </Route>
+          {
+            pages.filter(page => _.some(roles, role => _.includes(page.roles, role)))
+              .map($ => <Route path={$.link} render={$.component}/> )
+          }
+          {
+            pages.filter(page => _.every(roles, role => !_.includes(page.roles, role)))
+              .map($ => <Route path={$.link}> <Link to={"/"}>Przejdź do strony startowej</Link> </Route> )
+          }
+          <Route path="/" render={defaultComponent.component}/>
         </Switch>
       </div>
     </Router>
-  )
+  );
 }
 
 function AccountToolbar() {
 
   return (
-    <div className="row align-items-baseline">
+    <div className="row align-items-baseline ml-3">
       <div>
         <span>Zalogowany jako: {accountService.login}</span>
-        {accountService.hospital ? <span>, szpital: {accountService.hospital.name}</span> : ''}
+        {accountService.hospital && accountService.hospital.name && accountService.hospital.id !== "PL0" ? <span>, szpital: {accountService.hospital.name}</span> : ''}
+        {accountService.hospital && accountService.hospital.id === "PL0" ? <span>, Administrator</span> : ''}
       </div>
+      <button className="btn btn-outline-info ml-auto mr-4" onClick={() => {
+        accountService.switchHospital(null, null);
+        document.dispatchEvent(new Event('organizationChanged'));
+      }}>Zmień organizację</button>
       <button className="btn btn-outline-danger ml-auto mr-4" onClick={() => {location.reload()}}>Wyloguj</button>
     </div>
   )
-}
-
-function Home() {
-  return <h2>Home</h2>;
-}
-
-function Users() {
-  const [users, setUsers] = useState([]);
-
-  useEffect(() => {
-    db.collection("users").get().then(users => {
-      setUsers(_.map(users.docs, $ => $.data()));
-    })
-  }, [])
-
-  return (
-    <div>
-      <h2>Users</h2>
-      <div>{JSON.stringify(users)}</div>
-    </div>
-  );
 }

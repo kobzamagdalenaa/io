@@ -1,6 +1,9 @@
 class AccountService {
 
   constructor() {
+    this.login = 'jkowalski'
+    // this.hospital = {id: 'PL0'}
+    // this.roles = ["admin"]
   }
 
   loginAs(login, password) {

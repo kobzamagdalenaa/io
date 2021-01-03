@@ -320,13 +320,32 @@ function PatientsList() {
 
   async function loadPatients() {
     let patients = await patientService.loadAll();
-    setPatients(patients);
+    patients = _.map(patients, $ => {
+      const textIndex = _.filter([$.surname, $.name, $.pesel], $ => !!$).join(" ").toLowerCase();
+      return Object.assign($, {textIndex});
+    });
+    setPatients([]);
     setAllPatients(patients);
   }
 
   async function searchPatients(value) {
+    if (value.length === 0) {
+      setPatients([])
+    }
     if (value.length >= 3) {
-      setPatients(_.filter(allPatients, $ => $.pesel.indexOf(value) >= 0))
+      const searchElements = value.split(" ");
+      const filteredPatients = _.chain(searchElements)
+        .filter($ => !!$)
+        .filter($ => $.length >= 2)
+        .map($ => $.toLowerCase())
+        .flatMap(str => _.filter(allPatients, $ => $.textIndex.indexOf(str) >= 0))
+        .groupBy($ => $.pesel)
+        .values()
+        .map(group => ({e: group[0], size: group.length}))
+        .sortBy($ => (10 - $.size) + $.e.textIndex)
+        .map($ => $.e)
+        .value();
+      setPatients(filteredPatients);
     }
   }
 
@@ -338,20 +357,36 @@ function PatientsList() {
     <div>
       <h2 className="text-center">Pacjenci</h2>
       <div className="container" style={{maxWidth: "750px"}}>
-        <div className="row mb-2">
-          <div className="col-9">
+        <div className="d-flex mb-2">
+          <div className="flex-grow-1 ml-3 mr-3">
             <Search placeholder="Szukaj..." onChange={(value) => {searchPatients(value)}} />
           </div>
           <button className="col-2 btn btn-primary float-right" onClick={() => history.push(`${url}/add`)}>Dodaj</button>
         </div>
         <div>
-          {
-            patients.map(patient => (
-              <div>
-                {`${patient.name} ${patient.surname}, ${patient.gender}, PESEL: ${patient.pesel}, Email: ${patient.email}`}
-                <button onClick={() => history.push(`${url}/${patient.pesel}`)} className="btn btn-primary">Wybierz</button>
-              </div>))
-          }
+          {!patients.length ? null : (
+            <table className="table">
+              <tr>
+                <th>Pesel</th>
+                <th className="w-100">Imię i nazwisko</th>
+                <th></th>
+              </tr>
+              {
+                patients.map(patient => (
+                  <tr>
+                    <td>
+                      {patient.pesel}
+                    </td>
+                    <td>
+                      {`${patient.name} ${patient.surname}`}
+                    </td>
+                    <td>
+                      <button onClick={() => history.push(`${url}/${patient.pesel}`)} className="btn btn-primary">Wybierz</button>
+                    </td>
+                  </tr>))
+              }
+            </table>
+          )}
         </div>
       </div>
     </div>

@@ -18,7 +18,7 @@ export default function LoginForm() {
       db.collection("users")
         .where(firebase.firestore.FieldPath.documentId(), '==', accountService.login)
         .get().then(users => {
-        setAvailableHospitals(users.docs[0].data().permissions);
+        setAvailableHospitals(_.omitBy(users.docs[0].data().permissions, $ => $.length === 0));
       })
     }
   }, [])
@@ -52,7 +52,8 @@ export default function LoginForm() {
       Wybierz organizację
       <div >
         {_.keys(availableHospitals).map(hospitalId => {
-          const hospitalName = _.filter(allHospitals, $ => $.id === hospitalId)[0].name;
+          var hospitalCandidates = _.filter(allHospitals, $ => $.id === hospitalId);
+          const hospitalName = hospitalCandidates.length ? hospitalCandidates[0].name : "ADMIN";
           return (<button className="btn btn-outline-success ml-1 mr-1" onClick={() => switchHospital(hospitalId, hospitalName)}>{hospitalName}</button>)
         })}
         {_.keys(availableHospitals).length === 0 ? 'Twoje konto nie jest powiązane z żadnym szpitalem. Zgłoś się do administratora szpitala.' : ''}
