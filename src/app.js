@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {render} from 'react-dom';
-import {BrowserRouter as Router, Link, Route, Switch} from "react-router-dom";
+import {BrowserRouter as Router, Link, Route, Switch, useHistory} from "react-router-dom";
 import {db} from "./db";
 import * as _ from 'lodash';
 import Patients from "./patients/patients";
@@ -60,10 +60,9 @@ function App() {
     {name: "Zarządzaj słownikiem oddziałów", link: "/departments-management", roles: ["admin"], component: () => <DepartmentsManagement/>},
     {name: "Zarządzaj użytkownikami", link: "/manage-users", roles: ["hospital_admin", "admin"], component: () => <ManageUsers/>},
   ]
-  const page404 = {component: () => null};
 
   const [roles, setRoles] = useState([]);
-  const [defaultComponent, setDefaultComponent] = useState(page404);
+  const [defaultLink, setDefaultLink] = useState(null);
 
 
 
@@ -76,7 +75,7 @@ function App() {
 
   useEffect(() => {
     const found = pages.filter(page => _.some(roles, role => _.includes(page.roles, role)));
-    setDefaultComponent(found.length ? found[0] : page404)
+    setDefaultLink(found.length ? found[0].link : null)
   }, [roles])
 
   return (
@@ -100,11 +99,25 @@ function App() {
             pages.filter(page => _.every(roles, role => !_.includes(page.roles, role)))
               .map($ => <Route path={$.link}> <Link to={"/"}>Przejdź do strony startowej</Link> </Route> )
           }
-          <Route path="/" render={defaultComponent.component}/>
+          <Route path="/">
+            <DefaultUrlOpener page={defaultLink}/>
+          </Route>
         </Switch>
       </div>
     </Router>
   );
+}
+
+function DefaultUrlOpener({page}) {
+  const history = useHistory();
+
+  useEffect(() => {
+    if (history && page) {
+      history.push(page);
+    }
+  }, [history, page]);
+
+  return null;
 }
 
 function AccountToolbar() {

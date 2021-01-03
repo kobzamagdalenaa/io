@@ -51,7 +51,7 @@ export default function LoginForm() {
       {(currentHospital ? `Obecna organizacja: ${accountService.hospital.name}` : '')}
       Wybierz organizację
       <div >
-        {_.keys(availableHospitals).map(hospitalId => {
+        {_.keys(availableHospitals).sort().map(hospitalId => {
           var hospitalCandidates = _.filter(allHospitals, $ => $.id === hospitalId);
           const hospitalName = hospitalCandidates.length ? hospitalCandidates[0].name : "ADMIN";
           return (<button className="btn btn-outline-success ml-1 mr-1" onClick={() => switchHospital(hospitalId, hospitalName)}>{hospitalName}</button>)
