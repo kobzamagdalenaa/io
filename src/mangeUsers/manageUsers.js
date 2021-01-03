@@ -61,6 +61,10 @@ function HospitalManageUsers() {
     setFilter(value);
   }
 
+  function isCurrentUser(login) {
+    return accountService.login === login
+  }
+
   return (
     <div className="container">
       <h2>{accountService.hospital.name}</h2>
@@ -80,7 +84,7 @@ function HospitalManageUsers() {
               <td>{user.name}</td>
               <td>{user.surname}</td>
               <td><input type="checkbox" disabled={updating} checked={hasPermission(user, 'doctor')} onClick={() => switchPermission(user, 'doctor')}/></td>
-              <td><input type="checkbox" disabled={updating} checked={hasPermission(user, 'hospital_admin')} onClick={() => switchPermission(user, 'hospital_admin')}/></td>
+              <td><input type="checkbox" disabled={updating || isCurrentUser(user.id)} checked={hasPermission(user, 'hospital_admin')} onClick={() => switchPermission(user, 'hospital_admin')}/></td>
             </tr>
           ))
         }
@@ -145,6 +149,10 @@ function AdminManageUsers() {
     setFilter(value);
   }
 
+  function isCurrentUser(login) {
+    return accountService.login === login
+  }
+
   return (
     <div className="container">
       <h2>{accountService.hospital.name}</h2>
@@ -163,7 +171,7 @@ function AdminManageUsers() {
               <td>{user.id}</td>
               <td>{user.name}</td>
               <td>{user.surname}</td>
-              <td><input type="checkbox" disabled={updating} checked={hasPermission(user, 'admin', 'PL0')} onClick={() => switchPermission(user, 'admin', 'PL0')}/></td>
+              <td><input type="checkbox" disabled={updating || isCurrentUser(user.id)} checked={hasPermission(user, 'admin', 'PL0')} onClick={() => switchPermission(user, 'admin', 'PL0')}/></td>
               <td>
                 <table>
                   {
