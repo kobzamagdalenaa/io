@@ -39,7 +39,7 @@ function Root() {
   return (
     <div ref={refresher}>
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
-        <a className="navbar-brand" href="#">NAZWA APLIAKCJI</a>
+        <a className="navbar-brand" href="#">ZSZS</a>
 
         <div className="w-100" id="navbarSupportedContent">
           <div>{loggedId ? <AccountToolbar/> : <AccountForm/>  }</div>
