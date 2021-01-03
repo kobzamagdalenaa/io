@@ -18,10 +18,14 @@
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/preset-react": "^7.12.5",
+    "@wojtekmaj/enzyme-adapter-react-17": "^0.4.1",
+    "babel-jest": "^26.6.3",
     "babel-loader": "^8.2.1",
     "css-loader": "^5.0.1",
     "file-loader": "^6.2.0",
+    "jest": "^26.6.3",
     "react-router-dom": "^5.2.0",
+    "react-test-renderer": "^17.0.1",
     "style-loader": "^2.0.0",
     "webpack": "^5.4.0",
     "webpack-cli": "^4.2.0",
@@ -31,7 +35,8 @@
   "scripts": {
     "start": "webpack serve",
     "build-unix": "webpack --mode=production && cp index.html ./dist/index.html",
-    "build-windows": "webpack --mode=production && copy index.html dist"
+    "build-windows": "webpack --mode=production && copy index.html dist",
+    "test": "jest"
   },
   "eslintConfig": {
     "extends": [
