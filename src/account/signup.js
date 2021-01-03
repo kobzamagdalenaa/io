@@ -1,15 +1,11 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {db} from "../db";
-import * as _ from "lodash";
-import firebase from "firebase";
-import accountService from "../services/account.service";
+import React, { useState } from 'react'
+import {db} from "../db"
 
-export default function SignUpForm() {
-  const [signUpData, setSignUpData] = useState({login: undefined, password: undefined, name: undefined, surname: undefined});
-
-  function register(evt) {
-    evt.preventDefault();
-    db.collection("users").doc(signUpData.login).get().then(response => {
+export const register = (evt, signUpData, setSignUpDataCb) => {
+  evt.preventDefault();
+  
+  return db.collection("users").doc(signUpData.login).get()
+    .then(response => {
       if (response.data()) {
         alert("Konto już istnieje. Wybierz inny login");
       } else {
@@ -20,18 +16,24 @@ export default function SignUpForm() {
           permissions: {}
         }).then(() => {
           alert("Konto utworzone");
-          setSignUpData({login: undefined, password: undefined, name: undefined, surname: undefined})
+
+          setSignUpDataCb({login: undefined, password: undefined, name: undefined, surname: undefined})
+
           Array.from(document.querySelectorAll("#registerForm label input")).forEach(
             input => (input.value = "")
           );
         })
       }
     })
-  }
+    .catch(err => alert(`Blad serwera. Sprobuj raz jeszcze [Kod: "${err}"]`))
+}
+
+export default function SignUpForm() {
+  const [signUpData, setSignUpData] = useState({login: undefined, password: undefined, name: undefined, surname: undefined});
 
   return (
-    <div ref={signUpData}>
-      <form id="registerForm" onSubmit={register}>
+    <div>
+      <form id="registerForm" onSubmit={(ev) => register(ev, signUpData, setSignUpData)}>
         <div className="form-row justify-content-center align-items-baseline mt-3">
           <div className="form-group col-md-2 mr-4">
             <div className="row">
@@ -40,7 +42,7 @@ export default function SignUpForm() {
                 <div className="input-group-prepend">
                   <div className="input-group-text">Login</div>
                 </div>
-                <input type="text" className="form-control" value={signUpData.login} onChange={e => signUpData.login = e.target.value} />
+                <input name="login" type="text" className="form-control" value={signUpData.login} onChange={e => signUpData.login = e.target.value} />
               </div>
             </div>
           </div>
