@@ -68,3 +68,21 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `yarn build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Testing
+
+### Coverage Report
+
+Please execute yarn test --coverage from you command line console to output the test coverage report. 
+### Resources
+- [best practises](https://blog.sapegin.me/all/react-testing-1-best-practices/)
+- [mocking modules](https://pawelgrzybek.com/mocking-functions-and-modules-with-jest/)
+- [matchers](https://jestjs.io/docs/en/expect)
+- [jest object state management](https://jestjs.io/docs/en/jest-object)
+- [scoping](https://jestjs.io/docs/en/setup-teardown#scoping)
+- [snapshot testing](https://jestjs.io/docs/en/snapshot-testing)
+- [testing dom](https://dev.to/austinbh/testing-forms-in-react-using-enzyme-and-jest-2983)
+- Books:
+  - [TDD by example](https://www.empik.com/test-driven-development-by-example-beck-kent,531299,ksiazka-p)
+  - [Clean code](https://www.empik.com/clean-code-martin-robert-c,prod1261582,ksiazka-p)
+  - [Design patterns](https://www.enbook.pl/catalog/product/view/id/33877

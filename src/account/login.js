@@ -1,9 +1,24 @@
 import React, {useEffect, useState} from 'react';
 import {db} from "../db";
-import * as _ from "lodash";
-import firebase from "firebase";
 import accountService from "../services/account.service";
 
+  export const loginAs=(evt)=> {
+    evt.preventDefault();
+    return db.collection("users")
+      .where(firebase.firestore.FieldPath.documentId(), '==', loginData.login)
+      .where('password', '==', loginData.password)
+      .get()
+      .then(users => {
+      if (users.docs.length === 0) {
+        alert('złe dane');
+      } else {
+        const login = users.docs[0].id;
+        accountService.loginAs(login);
+        setAvailableHospitals(users.docs[0].data().permissions);
+        document.dispatchEvent(new Event('loggedIn'));
+      }
+    })
+  }
 export default function LoginForm() {
   const [loginData] = useState({login: undefined, password: undefined});
   const [availableHospitals, setAvailableHospitals] = useState();
@@ -23,22 +38,7 @@ export default function LoginForm() {
     }
   }, [])
 
-  function loginAs(evt) {
-    evt.preventDefault();
-    db.collection("users")
-      .where(firebase.firestore.FieldPath.documentId(), '==', loginData.login)
-      .where('password', '==', loginData.password)
-      .get().then(users => {
-      if (users.docs.length === 0) {
-        alert('złe dane');
-      } else {
-        const login = users.docs[0].id;
-        accountService.loginAs(login);
-        setAvailableHospitals(users.docs[0].data().permissions);
-        document.dispatchEvent(new Event('loggedIn'));
-      }
-    })
-  }
+
 
   function switchHospital(hospitalId, hospitalName) {
     accountService.switchHospital({id: hospitalId, name: hospitalName}, availableHospitals[hospitalId]);
