@@ -25,12 +25,14 @@ describe('LoginAs', () => {
         const preventDefaultMock = jest.fn()
         const eventMock = { preventDefault: preventDefaultMock }
         const loginData = { login: 'test', password: 'test' }
+        const setAvailableHospitals = jest.fn()
         const collectionMock = {
-            get: jest.fn().mockReturnValue(Promise.resolve({ users: jest.fn().mockReturnValue(0) })),//tu nw
+            get: jest.fn().mockReturnValue(),//tu jeszcze nw
         }
         const collectionSpy = jest.spyOn(db, 'collection',).mockImplementationOnce(() => collectionMock)
         
-        return loginAs(eventMock, { ...loginData})
+
+        return loginAs(eventMock, { ...loginData}, setAvailableHospitals)
         .then(() => {
             expect(preventDefaultMock).toHaveBeenCalledTimes(1)
 
@@ -38,9 +40,9 @@ describe('LoginAs', () => {
             expect(collectionSpy).toHaveBeenCalledWith()
 
             expect(collectionMock.get).toHaveBeenCalledTimes(1)
-            expect(collectionMock.get).toHaveBeenCalledWith()
+            expect(collectionMock.get).toHaveBeenCalledWith()//tu tez cos musze poprawic
 
-            expect(users.docs.length).toBeTruthy();//tu nie wiem jak zmockowac te frunkcje i dac warunek na prawde
+            expect(setAvailableHospitals).toHaveBeenCalledTimes(0)
     
             expect(window.alert.mock.calls.length).toBe(1)
             expect(window.alert.mock.calls).toEqual([['złe dane']])
