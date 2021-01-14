@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {db} from "../db";
 import accountService from "../services/account.service";
 
-  export const loginAs=(evt, loginData)=> {
+  export const loginAs=(evt, loginData, setAvailableHospitals)=> {
     evt.preventDefault();
     return db.collection("users")
       .where(firebase.firestore.FieldPath.documentId(), '==', loginData.login)
