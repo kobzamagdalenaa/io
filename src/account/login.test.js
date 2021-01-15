@@ -27,7 +27,7 @@ describe('LoginAs', () => {
         const loginData = { login: 'test', password: 'test' }
         const setAvailableHospitals = jest.fn()
         const collectionMock = {
-            get: jest.fn().mockReturnValue(),//tu jeszcze nw
+            get: jest.fn().mockReturnValue()//tu jeszcze nw
         }
         const collectionSpy = jest.spyOn(db, 'collection',).mockImplementationOnce(() => collectionMock)
         
