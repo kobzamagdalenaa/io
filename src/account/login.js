@@ -62,7 +62,7 @@ export default function LoginForm() {
   ) : (
     <div className="">
 
-      <form onSubmit={loginAs}>
+<form onSubmit={(ev) => loginAs(ev, loginData, setAvailableHospitals)}>
         <div className="form-row justify-content-center align-items-baseline mt-3">
           <div className="form-group col-md-2">
             <div className="row">

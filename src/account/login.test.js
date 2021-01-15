@@ -40,7 +40,7 @@ describe('LoginAs', () => {
             expect(collectionSpy).toHaveBeenCalledWith()
 
             expect(collectionMock.get).toHaveBeenCalledTimes(1)
-            expect(collectionMock.get).toHaveBeenCalledWith()//tu tez cos musze poprawic
+            expect(collectionMock.get).toHaveBeenCalledWith()
 
             expect(setAvailableHospitals).toHaveBeenCalledTimes(0)
     
